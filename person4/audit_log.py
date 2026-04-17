@@ -1,7 +1,7 @@
 import json
 import hashlib
 from pathlib import Path
-from person4.state import CallState
+from state import CallState
 
 LOG_FILE = Path("incident_log.jsonl")
 GENESIS_HASH = "GENESIS"
@@ -26,16 +26,29 @@ def log_node(state: CallState):
     prev_hash = get_last_hash()
 
     payload = {
+        "event_type": state.get("event_type", "call_risk_assessment"),
+        "source_system": state.get("source_system", "person4_consensus_agent"),
+        "outcome": state.get("outcome", "logged"),
         "call_id": state.get("call_id"),
+        "stream_sid": state.get("stream_sid"),
         "timestamp": state.get("timestamp"),
+        "caller_number": state.get("caller_number"),
+        "caller_type": state.get("caller_type"),
         "voice_score": state.get("voice_score"),
         "signal_quality": state.get("signal_quality"),
-        "caller_type": state.get("caller_type"),
+        "transcript": state.get("transcript"),
         "scam_likelihood": state.get("scam_likelihood"),
         "scam_type": state.get("scam_type"),
         "reason_codes": state.get("reason_codes", []),
         "final_score": state.get("final_score"),
         "final_risk": state.get("final_risk"),
+        "decision_reason": state.get("decision_reason"),
+        "decision_notes": state.get("decision_notes"),
+        "action": state.get("action"),
+        "alert_mode": state.get("alert_mode"),
+        "user_message": state.get("user_message"),
+        "hold_message": state.get("hold_message"),
+        "evidence_summary": state.get("evidence_summary")
     }
 
     event_hash = compute_hash(payload, prev_hash)
