@@ -1,7 +1,7 @@
 import json
 import hashlib
 from pathlib import Path
-from state import CallState
+from person4.state import CallState
 
 LOG_FILE = Path("incident_log.jsonl")
 GENESIS_HASH = "GENESIS"
