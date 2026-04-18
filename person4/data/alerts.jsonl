@@ -1,0 +1,2 @@
+{"alert_id": "alert_20260418_120551_967274", "timestamp": "2026-04-18T12:05:51.967298", "level": "CRITICAL", "title": "SCAM DETECTED", "message": "High-risk scam call from +15551234567", "incident_id": "inc_20260418_120551_966873", "call_id": "HOURS20_24_TEST"}
+{"alert_id": "alert_20260418_121544_835501", "timestamp": "2026-04-18T12:15:44.835526", "level": "CRITICAL", "title": "SCAM DETECTED", "message": "High-risk scam call from +15551234567", "incident_id": "inc_20260418_121544_835046", "call_id": "DEMO_TEST_001"}

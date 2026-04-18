@@ -10,8 +10,12 @@ from typing import Optional, Dict, Any, List
 class TamperEvidentLog:
     """Append-only log with hash chain verification."""
     
-    def __init__(self, log_path: str = None):
-        # Fix: Use relative path from current file
+    def __init__(self, log_path: Optional[str] = None):  # Changed: str → Optional[str]
+        """Initialize the tamper-evident log.
+        
+        Args:
+            log_path: Optional path to log file. If None, uses default location.
+        """
         if log_path is None:
             # This creates: /path/to/Scamurai/person4/data/logs/audit_chain.log
             self.log_path = Path(__file__).parent / "data" / "logs" / "audit_chain.log"

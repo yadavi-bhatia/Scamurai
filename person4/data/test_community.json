@@ -1,0 +1,48 @@
+{
+  "version": "2.0",
+  "created_at": "2026-04-18T15:05:06.566285",
+  "last_updated": "2026-04-18T15:05:06.568514",
+  "total_numbers": 1,
+  "total_reports": 2,
+  "numbers": {
+    "15551234567": {
+      "first_reported": "2026-04-18T15:05:06.566577",
+      "total_reports": 2,
+      "reputation_score": 47.75,
+      "reports": [
+        {
+          "report_id": "rpt_20260418_150506_566593",
+          "timestamp": "2026-04-18T15:05:06.566633",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp_request",
+            "bank_fraud"
+          ],
+          "confidence": 0.95,
+          "source": "system",
+          "user_id": null
+        },
+        {
+          "report_id": "rpt_20260418_150506_568427",
+          "timestamp": "2026-04-18T15:05:06.568474",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "impersonation"
+          ],
+          "confidence": 0.9,
+          "source": "user",
+          "user_id": "user_001"
+        }
+      ],
+      "tags": {
+        "otp_request": 1,
+        "bank_fraud": 1,
+        "impersonation": 1
+      },
+      "verdicts": [
+        "DANGEROUS",
+        "DANGEROUS"
+      ]
+    }
+  }
+}

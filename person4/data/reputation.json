@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "created_at": "2026-04-18T14:53:57.517164",
+  "total_numbers": 1,
+  "total_reports": 1,
+  "numbers": {
+    "15551234567": {
+      "first_reported": "2026-04-18T14:54:20.323928",
+      "total_reports": 1,
+      "reports": [
+        {
+          "report_id": "rpt_20260418_145420",
+          "timestamp": "2026-04-18T14:54:20.324075",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp_request"
+          ],
+          "confidence": 0.95,
+          "source": "system"
+        }
+      ],
+      "current_score": 38,
+      "tags": {
+        "otp_request": 1
+      }
+    }
+  }
+}
