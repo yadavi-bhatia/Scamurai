@@ -1,0 +1,25 @@
+
+======================================================================
+INTEGRITY TEST REPORT
+======================================================================
+Timestamp: 2026-04-18T12:05:47.898149
+Chain Path: data/immutable_log.jsonl
+Total Entries: 1
+Final Status: INVALID
+
+Test Results:
+  ✅ Chain exists
+  ✅ Chain not empty
+  ❌ Hashes valid
+  ✅ Links intact
+  ❌ No tampering
+  ✅ Chain exists
+  ✅ Chain not empty
+  ❌ Hashes valid
+  ✅ Links intact
+  ❌ No tampering
+
+======================================================================
+This chain is cryptographically verified.
+Any tampering would break the hash chain.
+======================================================================

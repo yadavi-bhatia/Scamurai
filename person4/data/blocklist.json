@@ -1,0 +1,24 @@
+{
+  "users": {
+    "user_001": {
+      "blocked_numbers": {
+        "15551234567": {
+          "phone_number": "15551234567",
+          "blocked_at": "2026-04-18T14:54:20.322751",
+          "reason": "Scam detected with 95% confidence. CRITICAL severity.",
+          "verdict": "DANGEROUS",
+          "risk_score": 95.0
+        },
+        "1234567890": {
+          "phone_number": "1234567890",
+          "blocked_at": "2026-04-18T14:55:34.469104",
+          "reason": "Known spammer",
+          "verdict": "DANGEROUS",
+          "risk_score": 0
+        }
+      },
+      "whitelist": {}
+    }
+  },
+  "total_blocks": 2
+}
