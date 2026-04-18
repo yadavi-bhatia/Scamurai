@@ -1,0 +1,109 @@
+{
+  "agent": "Person 2 - Linguistic Pattern Agent",
+  "version": "2.0.0",
+  "timestamp": "2026-04-18T13:48:40.579857",
+  "scenarios_tested": 6,
+  "results": [
+    {
+      "scenario": "safe_amazon_call",
+      "risk_score": 0.14,
+      "risk_level": "LOW_RISK",
+      "scam_type": "authority_impersonation",
+      "detected_keywords": [
+        "Amazon",
+        "[MONEY_AMOUNT]"
+      ],
+      "detected_categories": [
+        "fake_authority"
+      ],
+      "explanation": "\ud83d\udc6e Impersonation of authority figure detected | Keywords: Amazon, [MONEY_AMOUNT]",
+      "reason_codes": [
+        "R04"
+      ]
+    },
+    {
+      "scenario": "bank_kyc_scam",
+      "risk_score": 0.33,
+      "risk_level": "SUSPICIOUS",
+      "scam_type": "identity_theft_scam",
+      "detected_keywords": [
+        "OTP",
+        "urgent",
+        "Bank",
+        "[MONEY_AMOUNT]"
+      ],
+      "detected_categories": [
+        "identity_theft",
+        "urgency",
+        "fake_authority"
+      ],
+      "explanation": "\ud83c\udd94 Personal/identifying information requested; \u23f0 Artificial urgency or pressure tactics detected | Keywords: OTP, urgent, Bank",
+      "reason_codes": [
+        "R02",
+        "R05",
+        "R04"
+      ]
+    },
+    {
+      "scenario": "hinglish_police_scam",
+      "risk_score": 0.797,
+      "risk_level": "DANGEROUS",
+      "scam_type": "identity_theft_scam",
+      "detected_keywords": [
+        "Aadhaar",
+        "account number",
+        "OTP",
+        "Police",
+        "arrest",
+        "warrant",
+        "Turant",
+        "Jaldi karo"
+      ],
+      "detected_categories": [
+        "identity_theft",
+        "threat",
+        "urgency"
+      ],
+      "explanation": "\ud83c\udd94 Personal/identifying information requested; \u26a0\ufe0f Threatening or intimidating language used | Keywords: Aadhaar, account number, OTP",
+      "reason_codes": [
+        "R02",
+        "R03",
+        "R05"
+      ]
+    },
+    {
+      "scenario": "courier_scam",
+      "risk_score": 0.427,
+      "risk_level": "SUSPICIOUS",
+      "scam_type": "government_impersonation",
+      "detected_keywords": [
+        "legal action",
+        "police",
+        "immediately",
+        "right now",
+        "[MONEY_AMOUNT]"
+      ],
+      "detected_categories": [
+        "threat",
+        "urgency"
+      ],
+      "explanation": "\u26a0\ufe0f Threatening or intimidating language used; \u23f0 Artificial urgency or pressure tactics detected | Keywords: legal action, police, immediately",
+      "reason_codes": [
+        "R03",
+        "R05"
+      ]
+    },
+    {
+      "scenario": "normal_family_call",
+      "risk_score": 0.08,
+      "risk_level": "LOW_RISK",
+      "scam_type": "none",
+      "detected_keywords": [
+        "[MONEY_AMOUNT]"
+      ],
+      "detected_categories": [],
+      "explanation": "No scam indicators detected in this turn",
+      "reason_codes": []
+    }
+  ]
+}

@@ -8,6 +8,7 @@ from flask_cors import CORS
 import json
 from datetime import datetime
 from linguistic_agent import LinguisticAgent
+from schema_person2 import to_frozen_format, FrozenDetectionResult
 
 app = Flask(__name__)
 CORS(app)
@@ -75,6 +76,29 @@ def get_keywords():
         "total_keywords": len(ScamKeywordDatabase.get_all_keywords()),
         "keywords": ScamKeywordDatabase.KEYWORDS
     })
+
+@app.route('/analyze/frozen', methods=['POST'])
+def analyze_frozen():
+    """
+    Analyze transcript and return FROZEN format for Person 3
+    This is the stable contract endpoint
+    """
+    data = request.json
+    text = data.get('text', '')
+    session_id = data.get('session_id', 'default')
+    speaker = data.get('speaker', 'caller')
+    
+    # Get or create agent
+    if session_id not in sessions:
+        sessions[session_id] = LinguisticAgent(session_id)
+    
+    agent = sessions[session_id]
+    result = agent.analyze_transcript(text, speaker)
+    
+    # Convert to frozen format
+    frozen_result = to_frozen_format(result, session_id)
+    
+    return jsonify(frozen_result.to_dict())
 
 
 if __name__ == '__main__':

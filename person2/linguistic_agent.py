@@ -433,6 +433,158 @@ class LinguisticAgent:
         self.detection_history = []
         print(f"🔄 Session {self.session_id} reset")
 
+    # ============================================================
+    # HOUR 12: IMPROVED SCAM LANGUAGE RULES
+    # ============================================================
+
+    def _enhanced_scam_detection(self, text: str) -> Dict[str, Any]:
+        """
+        Enhanced detection for obvious scam phrases
+        Detects multiple scam indicators in same sentence
+        """
+        text_lower = text.lower()
+        
+        # Scam indicator categories for multi-factor detection
+        scam_indicators = {
+            "payment_request": ["bitcoin", "gift card", "send money", "wire transfer", "paypal", "venmo", "google pay", "phonepe"],
+            "urgency": ["immediately", "right now", "urgent", "asap", "don't hang up", "jaldi", "turant", "abhi"],
+            "threat": ["arrest", "warrant", "jail", "lawsuit", "court", "police", "pakda", "case"],
+            "authority": ["irs", "fbi", "police", "government", "bank", "microsoft", "rbi", "income tax"],
+            "identity": ["otp", "aadhaar", "pan", "ssn", "password", "pin", "bank account"]
+        }
+        
+        # Count triggered categories
+        triggered = [cat for cat, keywords in scam_indicators.items() if any(kw in text_lower for kw in keywords)]
+        
+        # Bonus risk for multiple indicators
+        if len(triggered) >= 3:
+            return {"bonus_risk": 0.15, "reason": f"Multiple scam indicators: {', '.join(triggered)}"}
+        elif len(triggered) >= 2:
+            return {"bonus_risk": 0.08, "reason": f"Multiple indicators: {', '.join(triggered)}"}
+        
+        return {"bonus_risk": 0.0, "reason": None}
+
+    # ============================================================
+    # HOUR 13: SHORT AND CLEAR EXPLANATIONS
+    # ============================================================
+
+    def _get_judge_explanation(self, categories: List[str], keywords: List[str], risk: float) -> str:
+        """
+        Generate judge-friendly, short, clear explanation
+        Used for demo presentation
+        """
+        if not categories:
+            return "✅ No scam indicators detected"
+        
+        # Short, clear explanations for judges
+        short_explanations = {
+            "payment_request": "💰 Asks for money/payment",
+            "identity_theft": "🆔 Requests personal info (OTP/Aadhaar/Bank)",
+            "threat": "⚠️ Uses threats or intimidation",
+            "fake_authority": "👮 Pretends to be official/authority",
+            "urgency": "⏰ Creates artificial urgency/pressure",
+            "scam_phrases": "📝 Uses known scam phrases"
+        }
+        
+        detected = [short_explanations[cat] for cat in categories if cat in short_explanations]
+        
+        if detected:
+            # Limit to 2 reasons for brevity
+            main_reasons = detected[:2]
+            explanation = "; ".join(main_reasons)
+            
+            # Add top keyword if exists
+            if keywords:
+                top_keyword = keywords[0].replace("[", "").replace("]", "")
+                explanation += f" (keyword: '{top_keyword}')"
+            
+            # Add urgency indicator for demo
+            if risk >= 0.6:
+                explanation = "🔴 " + explanation + " - INTERVENE NOW"
+            elif risk >= 0.4:
+                explanation = "🟠 " + explanation + " - ESCALATE"
+            elif risk >= 0.2:
+                explanation = "🟡 " + explanation
+            
+            return explanation
+        
+        return "⚠️ Suspicious patterns detected"
+
+    # ============================================================
+    # HOUR 15: PARTIAL TRANSCRIPT HANDLING
+    # ============================================================
+
+    def analyze_partial(self, text: str, is_final: bool = False, min_length: int = 5) -> DetectionResult:
+        """
+        Handle partial/incomplete transcripts with stability
+        
+        Args:
+            text: Partial transcript text
+            is_final: Whether this is the final version of this utterance
+            min_length: Minimum characters for meaningful analysis
+        """
+        # Handle empty or very short text
+        if not text or len(text.strip()) < min_length:
+            return DetectionResult(
+                turn_id=f"{self.session_id}_partial",
+                session_id=self.session_id,
+                timestamp=datetime.now().isoformat(),
+                transcript=text,
+                detected_keywords=[],
+                detected_categories=[],
+                risk_score=0.0,
+                risk_level="PENDING",
+                scam_type="insufficient_data",
+                explanation="⏳ Waiting for more speech...",
+                reason_codes=[],
+                evidence_hash=""
+            )
+        
+        # Run full analysis
+        result = self.analyze_transcript(text)
+        
+        # Adjust confidence for partial transcripts
+        if not is_final:
+            # Reduce confidence by 20% for non-final chunks
+            result.risk_score = round(result.risk_score * 0.8, 3)
+            result.explanation += " (partial - awaiting more context)"
+        
+        return result
+
+    def process_stream_turns(self, turns: List[Dict]) -> List[DetectionResult]:
+        """
+        Process a stream of transcript turns with accumulation
+        
+        Args:
+            turns: List of dicts with 'text', 'speaker', 'is_final'
+        """
+        results = []
+        accumulated_text = ""
+        
+        for turn in turns:
+            text = turn.get('text', '')
+            is_final = turn.get('is_final', False)
+            speaker = turn.get('speaker', 'caller')
+            
+            # Accumulate text for context
+            accumulated_text += " " + text
+            
+            if is_final:
+                # Process complete utterance
+                result = self.analyze_transcript(accumulated_text.strip(), speaker)
+                accumulated_text = ""
+            else:
+                # Process partial with lower confidence
+                result = self.analyze_partial(text, is_final)
+            
+            results.append(result)
+            
+            # Early alert for high risk
+            if result.risk_score >= config.RISK_THRESHOLDS.get("high", 0.5):
+                result.explanation += " [⚠️ EARLY ALERT - INTERVENE NOW]"
+        
+        return results
+
 
 # Quick test
 if __name__ == "__main__":
