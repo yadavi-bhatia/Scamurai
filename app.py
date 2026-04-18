@@ -10,6 +10,7 @@ from collections import deque
 
 import requests
 import numpy as np
+import librosa
 
 from flask import Flask, request, jsonify
 from flask_sock import Sock
@@ -58,9 +59,8 @@ latest_voice_analysis = None
 segment_buffers = {}
 segment_states = {}
 
-_voice_encoder = None
-_reference_embedding = None
-_resemblyzer_error = None
+# Global cache for reference MFCC voiceprint
+_reference_mfcc_voiceprint = None
 
 
 def iso_now():
@@ -193,33 +193,58 @@ def compute_signal_quality(signal, duration_sec):
     }
 
 
-def load_voice_encoder():
-    global _voice_encoder, _resemblyzer_error
-    if _voice_encoder is not None:
-        return _voice_encoder
-    try:
-        from resemblyzer import VoiceEncoder
-        _voice_encoder = VoiceEncoder()
-        return _voice_encoder
-    except Exception as e:
-        _resemblyzer_error = str(e)
+def extract_mfcc_voiceprint(audio_bytes, sample_rate=8000):
+    """
+    Extract a voiceprint from audio bytes using MFCC features.
+    Returns a 39-dimensional vector (13 MFCC + delta + delta-delta) averaged over time.
+    """
+    signal = pcm16le_bytes_to_float32(audio_bytes)
+    if signal.size == 0:
         return None
 
+    # Compute MFCC (13 coefficients)
+    mfcc = librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=13)
 
-def load_reference_embedding():
-    global _reference_embedding
-    if _reference_embedding is not None:
-        return _reference_embedding
-    encoder = load_voice_encoder()
-    if encoder is None or not os.path.exists(REFERENCE_VOICE_FILE):
+    # Compute delta (first derivative)
+    mfcc_delta = librosa.feature.delta(mfcc)
+
+    # Compute delta-delta (second derivative)
+    mfcc_delta2 = librosa.feature.delta(mfcc, order=2)
+
+    # Stack and average over time to get a single vector
+    features = np.vstack([mfcc, mfcc_delta, mfcc_delta2])  # shape: (39, time_frames)
+    voiceprint = np.mean(features, axis=1)  # shape: (39,)
+
+    # Normalize to unit length for cosine similarity
+    norm = np.linalg.norm(voiceprint)
+    if norm > 0:
+        voiceprint = voiceprint / norm
+
+    return voiceprint
+
+
+def load_reference_mfcc_voiceprint():
+    global _reference_mfcc_voiceprint
+    if _reference_mfcc_voiceprint is not None:
+        return _reference_mfcc_voiceprint
+
+    if not os.path.exists(REFERENCE_VOICE_FILE):
         return None
+
     try:
-        from resemblyzer import preprocess_wav
-        wav = preprocess_wav(REFERENCE_VOICE_FILE)
-        _reference_embedding = encoder.embed_utterance(wav)
-        return _reference_embedding
+        with open(REFERENCE_VOICE_FILE, 'rb') as f:
+            ref_bytes = f.read()
+        _reference_mfcc_voiceprint = extract_mfcc_voiceprint(ref_bytes)
+        return _reference_mfcc_voiceprint
     except Exception:
         return None
+
+
+def cosine_similarity(vec_a, vec_b):
+    if vec_a is None or vec_b is None:
+        return None
+    # Vectors are already normalized, so dot product equals cosine similarity
+    return float(np.dot(vec_a, vec_b))
 
 
 def simple_extract_voice_segment(audio_bytes, sample_rate=8000):
@@ -242,34 +267,14 @@ def simple_extract_voice_segment(audio_bytes, sample_rate=8000):
 
 
 def embed_audio_bytes(audio_bytes, sample_rate=8000):
-    encoder = load_voice_encoder()
-    if encoder is None:
-        return None, "resemblyzer_not_available"
+    """Compute MFCC voiceprint for audio bytes."""
     try:
-        from resemblyzer import preprocess_wav
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            tmp_path = tmp.name
-        try:
-            write_wav_file(tmp_path, audio_bytes, sample_rate=sample_rate)
-            wav = preprocess_wav(tmp_path)
-            if wav is None or len(wav) == 0:
-                return None, "preprocess_empty_audio"
-            embedding = encoder.embed_utterance(wav)
-            return embedding, None
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+        voiceprint = extract_mfcc_voiceprint(audio_bytes, sample_rate)
+        if voiceprint is None:
+            return None, "mfcc_extraction_failed"
+        return voiceprint, None
     except Exception as e:
         return None, str(e)
-
-
-def cosine_similarity(vec_a, vec_b):
-    if vec_a is None or vec_b is None:
-        return None
-    denom = np.linalg.norm(vec_a) * np.linalg.norm(vec_b)
-    if denom == 0:
-        return None
-    return float(np.dot(vec_a, vec_b) / denom)
 
 
 def analyze_voice(audio_bytes, stream_sid=None, call_id=None, caller_number=None, sample_rate=8000):
@@ -312,19 +317,17 @@ def analyze_voice(audio_bytes, stream_sid=None, call_id=None, caller_number=None
     segment_signal = pcm16le_bytes_to_float32(segment_bytes)
     duration_sec = len(segment_signal) / float(sample_rate)
     quality = compute_signal_quality(segment_signal, duration_sec)
-    incoming_embedding, incoming_error = embed_audio_bytes(segment_bytes, sample_rate=sample_rate)
-    reference_embedding = load_reference_embedding()
+    incoming_voiceprint, incoming_error = embed_audio_bytes(segment_bytes, sample_rate=sample_rate)
+    reference_voiceprint = load_reference_mfcc_voiceprint()
     notes = list(quality.get("notes", []))
     if incoming_error:
         notes.append(f"embedding_error:{incoming_error}")
-    if reference_embedding is None:
+    if reference_voiceprint is None:
         if not os.path.exists(REFERENCE_VOICE_FILE):
             notes.append("reference_voice_missing")
-        elif _resemblyzer_error:
-            notes.append(f"reference_embedding_error:{_resemblyzer_error}")
         else:
-            notes.append("reference_embedding_unavailable")
-    similarity = cosine_similarity(reference_embedding, incoming_embedding) if incoming_embedding is not None and reference_embedding is not None else None
+            notes.append("reference_embedding_error:mfcc_extraction_failed")
+    similarity = cosine_similarity(reference_voiceprint, incoming_voiceprint) if incoming_voiceprint is not None and reference_voiceprint is not None else None
     if similarity is None:
         confidence = max(quality["quality_score"] * 0.5, 0.0)
     else:
@@ -344,13 +347,13 @@ def analyze_voice(audio_bytes, stream_sid=None, call_id=None, caller_number=None
         "stream_sid": stream_sid,
         "call_id": call_id,
         "caller_number": caller_number,
-        "status": "ok" if similarity is not None and reference_embedding is not None else "fallback",
+        "status": "ok" if similarity is not None and reference_voiceprint is not None else "fallback",
         "label": label,
         "similarity_score": round(similarity, 6) if similarity is not None else None,
         "confidence_score": round(confidence, 6),
         "signal_quality_score": round(quality["quality_score"], 6),
         "signal_quality_label": quality["quality_label"],
-        "reference_available": reference_embedding is not None,
+        "reference_available": reference_voiceprint is not None,
         "segment": segment_meta,
         "duration_sec": quality["duration_sec"],
         "snr_db": quality["snr_db"],
