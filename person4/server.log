@@ -1,0 +1,107 @@
+INFO:     Started server process [54787]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+
+============================================================
+🚀 PERSON 4 - COMPLETE SERVER
+============================================================
+
+📡 Server Configuration:
+   Host: 127.0.0.1
+   Port: 8001
+
+📋 Available Endpoints:
+   POST /exotel-webhook - Receive Exotel calls
+   GET  /health - Health check
+   GET  /stats - System statistics
+   GET  / - API information
+
+🌐 Server URL: http://localhost:8001
+
+⚠️  Press Ctrl+C to stop the server
+============================================================
+
+INFO:     127.0.0.1:49902 - "GET /stats HTTP/1.1" 200 OK
+
+📞 Received webhook from Exotel:
+   CallSid: FINAL_TEST_001
+   From: +15551234567
+   To: +919876543210
+📝 Log written to: /media/anu/New Volume/Scamurai/person4/data/logs/audit_chain.log
+
+🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴
+🔴 RED ALERT - SCAM DETECTED 🔴
+🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴
+⚠️ Risk Level: DANGEROUS
+⚠️ Score: 100.0/100
+⚠️ Caller Type: ai-likely
+⚠️ Action: Warn user and block call
+
+🚨 DO NOT SHARE:
+   • OTP or One-Time Password
+   • PIN or UPI PIN
+   • Bank Account Details
+   • Credit/Debit Card Numbers
+   • Aadhar/PAN/Personal IDs
+
+✅ What to do:
+   • Hang up immediately
+   • Call your bank directly using official number
+   • Report to cyber crime portal: cybercrime.gov.in
+🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴
+
+
+🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵
+🎵 HOLD MUSIC TRAP ACTIVATED 🎵
+🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵
+📞 Playing: 'Please hold for a security specialist...'
+⏱️ Trap duration: 30 seconds
+📝 Caller behavior being recorded for evidence
+🔒 This buys time for trace and block
+🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵🎵
+
+
+======================================================================
+📋 PERSON 4 - INCIDENT SUMMARY
+======================================================================
+
+🎯 FINAL VERDICT:
+   Risk: 🔴 DANGEROUS (Score: 100.0/100)
+   Caller Type: ai-likely
+   Confidence: 91.0%
+
+📝 DECISION REASON:
+   Risk DANGEROUS (score: 100.0) - ai-likely caller
+
+🔍 REASON CODES:
+   • otp_request
+   • urgent_action
+   • both_signals_suspicious
+
+📞 TRANSCRIPT EXCERPT:
+   "Share your OTP to secure your account..."
+
+📱 CALL ROUTING (Exotel):
+   Call ID: FINAL_TEST_001
+   From: +15551234567
+   To: +919876543210
+   Route: exotel→+919876543210
+   Status: in-progress
+
+🔒 FORENSIC EVIDENCE:
+   Incident Hash: e12f8f12496abf8e9d3caacf56ac88ac...
+   Previous Hash: 6a9e4f96f34cfa10e87f428cd7915c06...
+   Timestamp: 2026-04-18T09:01:09.250751
+   Action Taken: Warn user and block call
+
+======================================================================
+✅ Evidence stored in tamper-evident log
+📁 Log location: person4/data/logs/audit_chain.log
+======================================================================
+
+INFO:     127.0.0.1:49904 - "POST /exotel-webhook HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [54787]
