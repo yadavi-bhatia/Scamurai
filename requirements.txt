@@ -1,4 +1,9 @@
 flask
 flask-sock
+groq
+numpy
+scipy
+librosa
+soundfile
 python-dotenv
-gunicorn
+requests
