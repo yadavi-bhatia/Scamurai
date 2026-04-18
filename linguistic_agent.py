@@ -1,9 +1,12 @@
 # linguistic_agent.py
+# Linguistic Pattern Agent
+# Integrated with Audio Feature Agent for family impersonation detection
 
 import time
 import os
 import json
 from groq import Groq
+from audio_agent import AudioFeatureAgent
 
 # ============================================
 # 1. SETUP: Groq Client
@@ -55,13 +58,26 @@ If the transcript appears normal or incomplete, set scam_likelihood < 30 and sca
 Do NOT include any text outside the JSON. The response must be valid JSON only.
 
 If the transcript is only a few words or an incomplete sentence (e.g., "Hello, this is..."), keep scam_likelihood 0 and scam_type "none". Only flag when you see clear scam behavior.
-
 """
+
 # Allowed reason codes (must match what Person 4 expects)
 ALLOWED_REASON_CODES = {
     "urgency", "secrecy", "authority_impersonation",
     "sensitive_data_request", "threat", "payment_pressure",
     "reward_bait", "off_platform"
+}
+
+# Family keywords that trigger voice analysis
+FAMILY_KEYWORDS = [
+    "grandma", "grandpa", "grandmother", "grandfather",
+    "mom", "dad", "mummy", "papa", "mother", "father",
+    "uncle", "aunt", "aunty", "cousin", "brother", "sister",
+    "beta", "betaa", "beti", "nana", "nani", "dada", "dadi"
+]
+
+ALLOWED_SCAM_TYPES = {
+    "bank impersonation", "police impersonation", "tech support",
+    "courier scam", "lottery scam", "none"
 }
 
 def normalize_reason_codes(codes: list) -> list:
@@ -84,7 +100,8 @@ def normalize_reason_codes(codes: list) -> list:
             normalized.append("urgency")
         elif "secret" in code_lower or "don't_tell" in code_lower:
             normalized.append("secrecy")
-        elif "impersonat" in code_lower or "authority" in code_lower or "bank" in code_lower or "bank_se" in code_lower:
+        elif ("impersonat" in code_lower or "authority" in code_lower or 
+              "bank" in code_lower or "bank_se" in code_lower):
             normalized.append("authority_impersonation")
         elif "otp" in code_lower or "pin" in code_lower or "password" in code_lower or "cvv" in code_lower:
             normalized.append("sensitive_data_request")
@@ -105,11 +122,6 @@ def normalize_reason_codes(codes: list) -> list:
             seen.add(code)
             unique.append(code)
     return unique
-
-ALLOWED_SCAM_TYPES = {
-    "bank impersonation", "police impersonation", "tech support",
-    "courier scam", "lottery scam", "none"
-}
 
 def filter_result(result: dict) -> dict:
     """
@@ -172,12 +184,10 @@ def filter_result(result: dict) -> dict:
     
     return result
 
-
-
 # ============================================
 # 3. CORE FUNCTION: Analyze Transcript
 # ============================================
-def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant") -> dict:
+def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant", audio_bytes: bytes = None) -> dict:
     words = transcript.strip().split()
     if len(words) < 5:
         return {
@@ -215,6 +225,33 @@ def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant") -> 
             result["reason_codes"] = normalize_reason_codes(result["reason_codes"])
         
         result = filter_result(result)
+        
+        # --- INTEGRATION: Check for family keywords and trigger audio analysis ---
+        if audio_bytes is not None:
+            transcript_lower = transcript.lower()
+            if any(kw in transcript_lower for kw in FAMILY_KEYWORDS):
+                try:
+                    audio_agent = AudioFeatureAgent()
+                    audio_result = audio_agent.analyze_chunk(
+                        audio_bytes=audio_bytes,
+                        call_id="batch-call",
+                        stream_sid="batch-stream"
+                    )
+                    result["audio_analysis"] = audio_result
+                    
+                    # Boost scam likelihood if voice mismatch detected
+                    if audio_result.get("voice_match_score", 1.0) < 0.3:
+                        result["scam_likelihood"] = min(100, result["scam_likelihood"] + 20)
+                        if "voice_mismatch" not in result["reason_codes"]:
+                            result["reason_codes"].append("voice_mismatch")
+                        if result["recommended_action"] == "allow":
+                            result["recommended_action"] = "warn"
+                except Exception as e:
+                    print(f"Audio analysis failed: {e}")
+                    result["audio_analysis"] = None
+        else:
+            result["audio_analysis"] = None
+        
         return result
         
     except json.JSONDecodeError as e:
@@ -224,7 +261,8 @@ def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant") -> 
             "scam_type": "error",
             "reason_codes": [],
             "summary": "Analysis failed due to invalid JSON response.",
-            "recommended_action": "allow"
+            "recommended_action": "allow",
+            "audio_analysis": None
         }
     except Exception as e:
         # API failure fallback (for demo resilience)
@@ -235,7 +273,8 @@ def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant") -> 
                 "scam_type": "bank impersonation",
                 "reason_codes": ["urgency", "authority_impersonation"],
                 "summary": "Scam detected (fallback mode).",
-                "recommended_action": "block"
+                "recommended_action": "block",
+                "audio_analysis": None
             }
         else:
             return {
@@ -243,29 +282,55 @@ def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant") -> 
                 "scam_type": "none",
                 "reason_codes": [],
                 "summary": "Analysis unavailable due to API error.",
-                "recommended_action": "allow"
+                "recommended_action": "allow",
+                "audio_analysis": None
             }
 
 # ============================================
 # 4. REAL-TIME CONTEXT HANDLER
 # ============================================
 class TranscriptAnalyzer:
-    def __init__(self, max_turns=10):
+    def __init__(self, max_turns=10, reference_voice_path=None):
         self.history = []
         self.max_turns = max_turns
+        self.audio_agent = AudioFeatureAgent(reference_voice_path=reference_voice_path)
 
-    def add_chunk(self, speaker: str, text: str) -> dict:
+    def add_chunk(self, speaker: str, text: str, audio_bytes: bytes = None) -> dict:
         timestamp = time.time()
-        # Store formatted timestamp with the utterance
         self.history.append(f"[{timestamp:.2f}] {speaker}: {text}")
-    
+        
         if len(self.history) > self.max_turns:
             self.history = self.history[-self.max_turns:]
-    
+        
         transcript = "\n".join(self.history)
         result = analyze_transcript(transcript)
-    # Optionally attach the timestamp to the result for Person 4
         result["timestamp"] = timestamp
+        
+        # --- Check for family keywords and trigger audio analysis ---
+        if audio_bytes is not None:
+            transcript_lower = transcript.lower()
+            if any(kw in transcript_lower for kw in FAMILY_KEYWORDS):
+                try:
+                    audio_result = self.audio_agent.analyze_chunk(
+                        audio_bytes=audio_bytes,
+                        call_id="stream-call",
+                        stream_sid="stream-stream"
+                    )
+                    result["audio_analysis"] = audio_result
+                    
+                    # Boost scam likelihood if voice mismatch detected
+                    if audio_result.get("voice_match_score", 1.0) < 0.3:
+                        result["scam_likelihood"] = min(100, result["scam_likelihood"] + 20)
+                        if "voice_mismatch" not in result["reason_codes"]:
+                            result["reason_codes"].append("voice_mismatch")
+                        if result["recommended_action"] == "allow":
+                            result["recommended_action"] = "warn"
+                except Exception as e:
+                    print(f"Audio analysis failed: {e}")
+                    result["audio_analysis"] = None
+        else:
+            result["audio_analysis"] = None
+        
         return result
 
     def reset(self):
