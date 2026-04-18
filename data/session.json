@@ -1,0 +1,20 @@
+{
+  "CallSid": "1da0bc65edabef1ce1f7ad18af2b1a4i",
+  "CallFrom": "09148411417",
+  "CallTo": "08047280738",
+  "Direction": "incoming",
+  "Created": "Sat, 18 Apr 2026 10:09:46",
+  "DialCallDuration": "0",
+  "StartTime": "2026-04-18 10:09:46",
+  "EndTime": "1970-01-01 05:30:00",
+  "CallType": "call-attempt",
+  "DialWhomNumber": "",
+  "flow_id": "1227908",
+  "tenant_id": "426514",
+  "From": "09148411417",
+  "To": "08047280738",
+  "CurrentTime": "2026-04-18 10:09:55",
+  "Stream[StreamSID]": "6f11f1c89cedf69af5c2284bfb9e1a4i",
+  "Stream[Status]": "in-progress",
+  "Stream[StreamUrl]": "wss://baking-moisten-entail.ngrok-free.dev/ws"
+}

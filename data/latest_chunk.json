@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "call_id": "1da0bc65edabef1ce1f7ad18af2b1a4i",
+  "stream_sid": "6f11f1c89cedf69af5c2284bfb9e1a4i",
+  "timestamp_ms": 14260,
+  "caller_number": "09148411417",
+  "event_type": "stop",
+  "call_state": "stopped",
+  "routing_status": "completed",
+  "sequence_number": 713,
+  "chunk_index": 713,
+  "audio_format": "raw/slin;rate=8000;channels=1;sample_width=16le",
+  "transfer_metadata": {
+    "provider": "exotel",
+    "flow_id": "1227908",
+    "direction": "incoming",
+    "target_number": "08047280738",
+    "from_number": "09148411417",
+    "to_number": "08047280738",
+    "call_type": "call-attempt",
+    "tenant_id": "426514",
+    "stream_sid": "6f11f1c89cedf69af5c2284bfb9e1a4i"
+  },
+  "received_at": "2026-04-18T04:40:11.192432+00:00",
+  "audio_chunk_base64": null,
+  "stop_reason": "canceled or call ended"
+}
