@@ -3,4 +3,4 @@ venv/
 __pycache__/
 *.pyc
 debug_audio/
-recordings/
+recordings/venv/
