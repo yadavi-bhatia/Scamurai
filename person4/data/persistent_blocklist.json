@@ -1,0 +1,44 @@
+{
+  "version": "2.0",
+  "created_at": "2026-04-18T15:05:07.507242",
+  "last_updated": "2026-04-18T15:31:45.941519",
+  "total_blocks": 3,
+  "blocks": [
+    {
+      "block_id": "blk_20260418_150507_507723",
+      "phone_number": "15551234567",
+      "user_id": "user_001",
+      "reason": "OTP request with urgent language",
+      "verdict": "DANGEROUS",
+      "risk_score": 95.0,
+      "tags": [],
+      "blocked_at": "2026-04-18T15:05:07.507755",
+      "source": "auto_detection",
+      "active": true
+    },
+    {
+      "block_id": "blk_20260418_152006_107845",
+      "phone_number": "15551234567",
+      "user_id": "default_user",
+      "reason": "Scam",
+      "verdict": "DANGEROUS",
+      "risk_score": 95.0,
+      "tags": [],
+      "blocked_at": "2026-04-18T15:20:06.107986",
+      "source": "auto_detection",
+      "active": true
+    },
+    {
+      "block_id": "blk_20260418_153145_941451",
+      "phone_number": "15559998888",
+      "user_id": "test_user",
+      "reason": "Test scam detection",
+      "verdict": "DANGEROUS",
+      "risk_score": 95.0,
+      "tags": [],
+      "blocked_at": "2026-04-18T15:31:45.941501",
+      "source": "auto_detection",
+      "active": true
+    }
+  ]
+}

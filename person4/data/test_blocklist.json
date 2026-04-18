@@ -1,0 +1,20 @@
+{
+  "version": "2.0",
+  "created_at": "2026-04-18T15:05:06.431602",
+  "last_updated": "2026-04-18T15:05:06.431957",
+  "total_blocks": 1,
+  "blocks": [
+    {
+      "block_id": "blk_20260418_150506_431900",
+      "phone_number": "15551234567",
+      "user_id": "default_user",
+      "reason": "Scam detected - OTP request",
+      "verdict": "DANGEROUS",
+      "risk_score": 95,
+      "tags": [],
+      "blocked_at": "2026-04-18T15:05:06.431942",
+      "source": "auto_detection",
+      "active": true
+    }
+  ]
+}

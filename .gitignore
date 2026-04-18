@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 .env
 venv/
 __pycache__/
 *.pyc
 debug_audio/
 recordings/venv/
+=======
+venv/
+__pycache__/
+*.pyc
+>>>>>>> efcfee3ebdb8eed31abb534974e2656a0a73499a

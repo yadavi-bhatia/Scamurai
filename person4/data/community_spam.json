@@ -1,0 +1,127 @@
+{
+  "version": "2.0",
+  "created_at": "2026-04-18T15:05:07.507350",
+  "last_updated": "2026-04-18T15:31:45.970119",
+  "total_numbers": 2,
+  "total_reports": 7,
+  "numbers": {
+    "15551234567": {
+      "first_reported": "2026-04-18T15:05:07.508091",
+      "total_reports": 6,
+      "reputation_score": 78.5,
+      "reports": [
+        {
+          "report_id": "rpt_20260418_150507_508097",
+          "timestamp": "2026-04-18T15:05:07.508115",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp_request",
+            "bank_impersonation"
+          ],
+          "confidence": 0.95,
+          "source": "system",
+          "user_id": "user_001"
+        },
+        {
+          "report_id": "rpt_20260418_150518_345304",
+          "timestamp": "2026-04-18T15:05:18.345336",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp_request",
+            "bank_impersonation"
+          ],
+          "confidence": 0.95,
+          "source": "system",
+          "user_id": "user_001"
+        },
+        {
+          "report_id": "rpt_20260418_152006_186553",
+          "timestamp": "2026-04-18T15:20:06.186785",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp"
+          ],
+          "confidence": 0.95,
+          "source": "user",
+          "user_id": null
+        },
+        {
+          "report_id": "rpt_20260418_152025_873243",
+          "timestamp": "2026-04-18T15:20:25.873346",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp"
+          ],
+          "confidence": 0.95,
+          "source": "user",
+          "user_id": null
+        },
+        {
+          "report_id": "rpt_20260418_152301_757286",
+          "timestamp": "2026-04-18T15:23:01.757334",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp_request",
+            "bank_fraud"
+          ],
+          "confidence": 0.95,
+          "source": "user",
+          "user_id": null
+        },
+        {
+          "report_id": "rpt_20260418_152640_181765",
+          "timestamp": "2026-04-18T15:26:40.181818",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "otp",
+            "fraud"
+          ],
+          "confidence": 0.95,
+          "source": "user",
+          "user_id": null
+        }
+      ],
+      "tags": {
+        "otp_request": 3,
+        "bank_impersonation": 2,
+        "otp": 3,
+        "bank_fraud": 1,
+        "fraud": 1
+      },
+      "verdicts": [
+        "DANGEROUS",
+        "DANGEROUS",
+        "DANGEROUS",
+        "DANGEROUS",
+        "DANGEROUS",
+        "DANGEROUS"
+      ]
+    },
+    "15559998888": {
+      "first_reported": "2026-04-18T15:31:45.970028",
+      "total_reports": 1,
+      "reputation_score": 38.5,
+      "reports": [
+        {
+          "report_id": "rpt_20260418_153145_970055",
+          "timestamp": "2026-04-18T15:31:45.970093",
+          "verdict": "DANGEROUS",
+          "tags": [
+            "test_scam",
+            "otp_request"
+          ],
+          "confidence": 0.95,
+          "source": "test",
+          "user_id": "test_user"
+        }
+      ],
+      "tags": {
+        "test_scam": 1,
+        "otp_request": 1
+      },
+      "verdicts": [
+        "DANGEROUS"
+      ]
+    }
+  }
+}
