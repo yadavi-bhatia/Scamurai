@@ -482,10 +482,86 @@ function App(){
   const [toastMsg,setToastMsg]=useState('');
   const [toastShow,setToastShow]=useState(false);
   const playRef=useRef(),callRef=useRef();
-  const scen=SCENARIOS[scenIdx];
+  const [displayScore, setDisplayScore] = useState(0);
+ const [backendData, setBackendData] = useState(null);
+useEffect(() => {
+  if (backendData?.transcript) {
+    const lines = backendData.transcript.split(".");
+
+    setTranscript(
+      lines
+        .map((t, i) => t.trim())
+        .filter(Boolean)
+        .map((t, i) => ({
+          who: "caller",
+          text: t,
+          t: `0:${i * 3}`
+        }))
+    );
+  }
+}, [backendData]);
+
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/start-call");
+}, []);
+const adaptBackend = (data) => {
+  if (!data) return null;
+
+  return {
+    scamScore: Math.round((data.decision?.risk_score || 0) * 100),
+    riskLevel: data.decision?.risk_level || "LOW",
+
+    signals: [
+      Math.round((data.signals?.linguistic_score || 0) * 100),
+      Math.round((data.signals?.impersonation_score || 0) * 100),
+      Math.round((data.signals?.money_risk || 0) * 100),
+      Math.round((data.signals?.voice_risk || 0) * 100)
+    ],
+
+    transcript: data.transcript || "",
+
+    alerts: (data.decision?.reason_codes || []).map(code => ({
+      cls: "a-red",
+      icon: "⚠️",
+      text: code.replaceAll("_", " ")
+    }))
+  };
+};
+useEffect(() => {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/get-result");
+      const data = await res.json();
+      const adapted = adaptBackend(data);
+setBackendData(adapted);
+    } catch (e) {}
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+useEffect(() => {
+  if (!backendData) return;
+
+  const target = backendData.scamScore || 0;
+  const interval = setInterval(() => {
+    setDisplayScore(prev => {
+      if (prev >= target) return target;
+      return prev + 2;
+    });
+  }, 50);
+
+  return () => clearInterval(interval);
+}, [backendData]);
+const scen = {
+  ...SCENARIOS[scenIdx],
+  scamScore: backendData?.scamScore || 0,
+  riskLevel: backendData?.riskLevel || "LOW",
+  signals: backendData?.signals || [0,0,0,0]
+};  // ✅ FIXED FALLBACK
 
   const toast=msg=>{setToastMsg(msg);setToastShow(true);setTimeout(()=>setToastShow(false),2500);};
-
+  useEffect(() => {
+  }, []);
   useEffect(()=>{const tick=()=>{const n=new Date(),p=v=>String(v).padStart(2,'0');setClock(`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`)};tick();const id=setInterval(tick,1000);return()=>clearInterval(id);},[]);
 
   const getRiskLbl=s=>s>=thresholds.dangerous?'DANGEROUS':s>=thresholds.high?'HIGH RISK':s>=thresholds.medium?'MEDIUM':'LOW RISK';
@@ -494,11 +570,9 @@ function App(){
 
   const stopPlay=()=>{setIsPlaying(false);clearTimeout(playRef.current);clearInterval(callRef.current);setPlayPos(0);setCallSecs(0);setTranscript([{who:'system',text:'Call starting — analysis armed...',t:'0:00'}]);};
   const selectScenario=i=>{stopPlay();setScenIdx(i);setBlBtn({text:'🚫 BLACKLIST NUMBER',cls:'btn-warn'});};
-  const togglePlay=()=>{
-    if(playPos>=PLAY_DUR){stopPlay();return;}
-    if(isPlaying){setIsPlaying(false);clearTimeout(playRef.current);clearInterval(callRef.current);}
-    else{setIsPlaying(true);callRef.current=setInterval(()=>setCallSecs(s=>s+1),1000);}
-  };
+  const togglePlay = () => {
+  setIsPlaying(true);
+};
 
   useEffect(()=>{
     if(!isPlaying)return;
@@ -510,6 +584,7 @@ function App(){
     });
     playRef.current=setTimeout(run,100);return()=>clearTimeout(playRef.current);
   },[isPlaying,scen]);
+  
 
   const blacklistNumber=async()=>{
     const num=scen.number;
@@ -580,7 +655,7 @@ function App(){
         {page==='Live Monitor'?(<>
           <main className="main">
             <div className="scen-strip">
-              {SCENARIOS.map((s,i)=><div key={s.id} className={`sc${scenIdx===i?' s'+i:''}`} onClick={()=>selectScenario(i)}>
+              {SCENARIOS.map((s,i)=><div key={s.id} className={`sc${scenIdx===i?' s'+i:''}`} style={{pointerEvents:"none", opacity:0.6}}>
                 <div className={`sc-badge ${i===0?'b-ai':i===1?'b-hu':'b-dp'}`}>{i===0?'AI SCAMMER':i===1?'HUMAN':'DEEPFAKE'}</div>
                 <div style={{fontSize:20,marginBottom:4}}>{i===0?'🤖':i===1?'👤':'👥'}</div>
                 <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>{i===0?'AI Scammer Call':i===1?'Human Scammer Call':'Deepfake Family'}</div>

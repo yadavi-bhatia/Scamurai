@@ -249,3 +249,28 @@ if __name__ == "__main__":
         print(f"   CONFIDENCE: {result.confidence:.0%}")
         print(f"   EXPLANATION: {result.explanation}")
         print(f"   RISK CONTRIBUTION: {detector.get_risk_contribution(result):.0%}")
+
+def detect(text: str) -> float:
+    """
+    Wrapper for pipeline compatibility
+    Returns float score (0–1)
+    """
+
+    detector = ImpersonationDetector()
+
+    try:
+        result = detector.detect(text)
+    except Exception:
+        return 0.0
+
+    # 🔥 Convert structured output → float score
+    if result is None:
+        return 0.0
+
+    if hasattr(result, "confidence"):
+        return float(result.confidence)
+
+    if isinstance(result, (int, float)):
+        return float(result)
+
+    return 0.0

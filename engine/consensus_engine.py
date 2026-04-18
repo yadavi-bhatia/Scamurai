@@ -1,75 +1,93 @@
-"""Consensus engine combining voice and transcript signals."""
+"""Consensus engine combining signals (robust, enum-safe)."""
 
-from typing import Tuple, List
-from models import (
-    RiskLevel, CallerType, VoiceAnalysisResult,
-    TranscriptAnalysisResult
-)
+from engine.models import RiskLevel
 
 
 class ConsensusEngine:
-    """Combines voice and transcript signals into final decision."""
-    
     def __init__(self):
-        self.RISK_THRESHOLD_SUSPICIOUS = 40
-        self.RISK_THRESHOLD_DANGEROUS = 70
-    
-    def decide(
-        self,
-        voice_result: VoiceAnalysisResult,
-        transcript_result: TranscriptAnalysisResult
-    ) -> Tuple[RiskLevel, float, CallerType, str, List[str]]:
+        # using 0–1 scale since your signals are normalized
+        self.RISK_THRESHOLD_SUSPICIOUS = 0.4
+        self.RISK_THRESHOLD_DANGEROUS = 0.7
+
+    def _pick_risk(self, score):
         """
-        Make final decision based on all signals.
-        
-        Returns:
-            (final_risk, final_score, caller_type, reason, reason_codes)
+        Pick a RiskLevel member WITHOUT iterating or assuming names.
+        We try common names; if not present, we fallback safely.
         """
-        
-        # Step 1: Calculate weighted score based on signal quality
-        if voice_result.signal_quality >= 0.7:
-            transcript_weight = 0.7
-            voice_weight = 0.3
+        # try common names first (if your enum has them)
+        name_map = [
+            ("HIGH", "DANGEROUS"),
+            ("MEDIUM", "SUSPICIOUS"),
+            ("LOW", "SAFE"),
+        ]
+
+        # determine desired tier
+        if score >= self.RISK_THRESHOLD_DANGEROUS:
+            desired = 0  # HIGH/DANGEROUS
+        elif score >= self.RISK_THRESHOLD_SUSPICIOUS:
+            desired = 1  # MEDIUM/SUSPICIOUS
         else:
-            transcript_weight = 0.85
-            voice_weight = 0.15
-        
-        final_score = (transcript_result.scam_likelihood * transcript_weight + 
-                      voice_result.voice_score * voice_weight)
-        
-        # Step 2: Apply special reconciliation rules
-        caller_type = voice_result.caller_type
-        reason_codes = transcript_result.reason_codes.copy()
-        
-        # Rule 1: AI voice but low transcript risk -> uncertain
-        if (voice_result.caller_type == CallerType.AI and 
-            transcript_result.scam_likelihood < 30):
-            caller_type = CallerType.UNCERTAIN
-            final_score = min(final_score + 10, 100)
-            reason_codes.append("voice_ai_low_transcript_risk")
-        
-        # Rule 2: Both suspicious -> escalate strongly
-        elif (voice_result.caller_type in [CallerType.AI, CallerType.UNCERTAIN] and
-              transcript_result.scam_likelihood > 60):
-            final_score = min(final_score + 15, 100)
-            reason_codes.append("both_signals_suspicious")
-        
-        # Rule 3: Determine risk level
-        if final_score >= self.RISK_THRESHOLD_DANGEROUS:
-            final_risk = RiskLevel.DANGEROUS
-            action = "Warn user and block call"
-        elif final_score >= self.RISK_THRESHOLD_SUSPICIOUS:
-            final_risk = RiskLevel.SUSPICIOUS
-            action = "Warn user with caution"
-        else:
-            final_risk = RiskLevel.SAFE
-            action = "Normal handling"
-        
-        # Step 4: Generate reason
-        reason = f"Risk {final_risk.value} (score: {final_score:.1f}) - {caller_type.value} caller"
-        
-        return final_risk, final_score, caller_type, reason, reason_codes
-    
-    def verify_decision(self, decision) -> bool:
-        """Verify decision is valid."""
-        return 0 <= decision.final_score <= 100
+            desired = 2  # LOW/SAFE
+
+        # try to fetch by common names
+        for name in name_map[desired]:
+            if hasattr(RiskLevel, name):
+                return getattr(RiskLevel, name)
+
+        # fallback: grab ANY member via __members__ (works for Enum/StrEnum)
+        members = getattr(RiskLevel, "__members__", None)
+        if members:
+            # pick first/middle/last based on desired tier
+            values = list(members.values())
+            if desired == 0:
+                return values[-1]
+            elif desired == 1:
+                return values[len(values)//2]
+            else:
+                return values[0]
+
+        # last-resort: just return the class itself (stringify later)
+        return RiskLevel
+
+    def decide(self, signals):
+        # signals expected in 0–1
+        ling = signals.get("linguistic_score", 0.5)
+        voice = signals.get("voice_risk", 0.5)
+        money = signals.get("money_risk", 0.5)
+        imp = signals.get("impersonation_score", 0.5)
+
+        # weighted fusion
+        final_score = (
+            0.4 * ling +
+            0.2 * voice +
+            0.2 * money +
+            0.2 * imp
+        )
+
+        reason_codes = []
+        if ling > 0.7:
+            reason_codes.append("high_linguistic_risk")
+        if money > 0.7:
+            reason_codes.append("money_pattern")
+        if imp > 0.7:
+            reason_codes.append("impersonation_pattern")
+
+        final_risk = self._pick_risk(final_score)
+
+        # safe stringify
+        risk_value = getattr(final_risk, "value", str(final_risk))
+
+        return {
+            "risk_score": round(final_score, 2),
+            "risk_level": str(risk_value),
+            "reason_codes": reason_codes
+        }
+
+
+# =========================
+# ENTRY POINT (used by your pipeline)
+# =========================
+
+def get_final_decision(signals):
+    engine = ConsensusEngine()
+    return engine.decide(signals)

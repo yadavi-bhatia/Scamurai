@@ -187,7 +187,7 @@ def filter_result(result: dict) -> dict:
 # ============================================
 # 3. CORE FUNCTION: Analyze Transcript
 # ============================================
-def analyze_transcript(transcript: str, model: str = "llama-3.1-8b-instant", audio_bytes: bytes = None) -> dict:
+def analyze_transcript(transcript: str, model: str = "llama-3.3-70b-versatile", audio_bytes: bytes = None) -> dict:
     words = transcript.strip().split()
     if len(words) < 5:
         return {
