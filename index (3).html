@@ -1,786 +1,2298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SCAMURAI — Threat Intel v2.1</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0b0f;--bg2:#0f1117;--bg3:#141720;--bg4:#1a1e2b;
-  --border:#1e2438;--border2:#2a3050;
-  --text:#e8ecf8;--text2:#8b93b5;--text3:#4a5278;
-  --red:#ff3b5c;--orange:#ff6b35;--yellow:#ffd23f;--green:#00ff88;--cyan:#00d4ff;--purple:#a855f7;
-  --red-dim:rgba(255,59,92,0.15);--orange-dim:rgba(255,107,53,0.12);
-  --green-dim:rgba(0,255,136,0.12);--cyan-dim:rgba(0,212,255,0.1);
-}
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden}
-.mono{font-family:'Share Tech Mono',monospace}
-.dash{display:grid;grid-template-columns:220px 1fr 300px;grid-template-rows:auto 1fr;height:100vh;overflow:hidden}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:16px;grid-row:1/3;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.center-col{display:flex;flex-direction:column;grid-row:1/3;overflow:hidden}
-.right-panel{background:var(--bg2);border-left:1px solid var(--border);padding:14px;grid-row:1/3;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
-.logo{display:flex;align-items:center;gap:10px;padding:8px 0 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
-.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--red),var(--orange));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.logo-text{font-weight:800;font-size:16px;letter-spacing:1px}
-.logo-sub{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:2px}
-.nav-section{font-size:10px;color:var(--text3);letter-spacing:2px;font-family:'Share Tech Mono',monospace;padding:10px 0 4px;margin-top:4px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;border:1px solid transparent}
-.nav-item:hover{background:var(--bg3);color:var(--text);border-color:var(--border)}
-.nav-item.active{background:var(--red-dim);color:var(--red);border-color:rgba(255,59,92,0.3)}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0}
-.nav-item.active .nav-dot{background:var(--red);box-shadow:0 0 6px var(--red)}
-.bl-count-box{margin-top:auto;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:14px;flex-shrink:0}
-.sys-status{display:flex;align-items:center;gap:8px;font-size:12px;font-family:'Share Tech Mono',monospace}
-.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pg 2s infinite;flex-shrink:0}
-.sdot.red{background:var(--red);animation:pr 1s infinite}
-@keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.4)}50%{box-shadow:0 0 0 6px rgba(0,255,136,0)}}
-@keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(255,59,92,.4)}50%{box-shadow:0 0 0 8px rgba(255,59,92,0)}}
-.exotel-badge{background:var(--cyan-dim);border:1px solid rgba(0,212,255,.25);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--cyan);font-family:'Share Tech Mono',monospace}
-.clock{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);margin-left:auto}
-.main{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.scen-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.sc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.sc:hover{border-color:var(--border2);transform:translateY(-1px)}
-.sc.s0{border-color:var(--red);background:var(--red-dim)}
-.sc.s1{border-color:var(--orange);background:var(--orange-dim)}
-.sc.s2{border-color:var(--purple);background:rgba(168,85,247,.12)}
-.sc-badge{position:absolute;top:8px;right:8px;font-size:9px;padding:2px 7px;border-radius:4px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;font-weight:700}
-.b-ai{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,92,.3)}
-.b-hu{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,53,.3)}
-.b-dp{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
-.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-.metric .lbl{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:1.5px;margin-bottom:4px}
-.metric .val{font-size:22px;font-weight:800}
-.metric .ch{font-size:10px;margin-top:3px;font-family:'Share Tech Mono',monospace}
-.danger{color:var(--red)}.warn{color:var(--yellow)}.safe{color:var(--green)}.info{color:var(--cyan)}
-.wave-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.pt{font-size:13px;font-weight:700;letter-spacing:.5px}
-.chart-area{height:140px;position:relative;overflow:hidden}
-.risk-tag{padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px}
-.risk-dangerous{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,92,.4)}
-.risk-high{background:rgba(255,107,53,.15);color:var(--orange);border:1px solid rgba(255,107,53,.3)}
-.risk-medium{background:rgba(255,210,63,.12);color:var(--yellow);border:1px solid rgba(255,210,63,.25)}
-.risk-low{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,.25)}
-.play-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-top:8px}
-.pbtn{width:30px;height:30px;border-radius:50%;background:var(--red);border:none;cursor:pointer;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.pbtn:hover{transform:scale(1.05);background:#e02e4e}
-.pbtn.playing{background:var(--orange)}
-.prog-wrap{flex:1;height:4px;background:var(--bg4);border-radius:2px;position:relative;cursor:pointer}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:2px}
-.prog-dot{width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:-3px;box-shadow:0 0 6px var(--red)}
-.sig-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.sig-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
-.sig-name{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:1px}
-.sig-pct{font-size:17px;font-weight:700;margin:3px 0}
-.sig-bar-w{height:4px;background:var(--bg4);border-radius:2px;margin:4px 0;overflow:hidden}
-.sig-bar{height:100%;border-radius:2px;transition:width .8s ease}
-.footer{background:var(--bg2);border-top:1px solid var(--border);padding:7px 18px;display:flex;align-items:center;gap:18px;font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;flex-shrink:0}
-.fdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.rp-sec{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px}
-.rp-ttl{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:2px;margin-bottom:10px}
-.gauge-wrap{display:flex;flex-direction:column;align-items:center}
-.gauge-lbl{font-size:30px;font-weight:800;margin-top:-8px}
-.gauge-sub{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:1.5px;margin-top:2px}
-.thresh-wrap{display:flex;flex-direction:column;gap:8px}
-.thresh-row{display:flex;align-items:center;gap:8px}
-.thresh-lbl{font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--text3);width:68px;flex-shrink:0}
-.thresh-slider{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer;background:var(--bg4)}
-.thresh-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);cursor:pointer}
-.thresh-val{font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--cyan);width:26px;text-align:right}
-.t-area{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
-.t-area::-webkit-scrollbar{width:3px}
-.t-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.t-line{display:flex;gap:6px;align-items:flex-start}
-.t-who{font-size:10px;font-family:'Share Tech Mono',monospace;padding:2px 5px;border-radius:4px;flex-shrink:0;margin-top:1px}
-.t-caller{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,92,.3)}
-.t-sys{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
-.t-txt{font-size:11px;color:var(--text2);line-height:1.5;flex:1}
-.t-tm{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;flex-shrink:0}
-.t-line.flag .t-txt{color:var(--red)}
-.alert-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;border:1px solid;margin-bottom:5px;font-size:11px}
-.a-red{background:var(--red-dim);border-color:rgba(255,59,92,.35)}
-.a-yel{background:rgba(255,210,63,.1);border-color:rgba(255,210,63,.25)}
-.act-btns{display:flex;flex-direction:column;gap:7px}
-.btn{padding:9px 12px;border-radius:8px;font-size:13px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;cursor:pointer;border:1px solid;transition:all .2s;text-align:center;background:none;color:inherit;display:block;width:100%}
-.btn-danger{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important}
-.btn-danger:hover{opacity:.85;transform:scale(1.01)}
-.btn-warn{border-color:var(--orange)!important;color:var(--orange)!important}
-.btn-warn:hover{background:var(--orange-dim)}
-.btn-ghost{border-color:var(--border2)!important;color:var(--text2)!important}
-.btn-ghost:hover{background:var(--bg4);color:var(--text)!important}
-.btn-success{border-color:var(--green)!important;color:var(--green)!important;background:var(--green-dim)!important}
-.bl-preview{display:flex;flex-direction:column;gap:4px;max-height:110px;overflow-y:auto}
-.bl-entry{display:flex;align-items:center;justify-content:space-between;padding:4px 7px;background:var(--bg4);border-radius:5px}
-.bl-phone{font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--text2)}
-.bl-tag{font-size:9px;padding:1px 5px;border-radius:3px;font-family:'Share Tech Mono',monospace}
-.bl-ai{background:var(--red-dim);color:var(--red)}
-.bl-human{background:var(--orange-dim);color:var(--orange)}
-.bl-deep{background:rgba(168,85,247,.15);color:var(--purple)}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center}
-.overlay.show{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--red);border-radius:16px;padding:26px;max-width:420px;width:90%;text-align:center}
-.m-icon{font-size:44px;margin-bottom:10px}
-.m-title{font-size:19px;font-weight:800;color:var(--red);margin-bottom:7px}
-.m-msg{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px}
-.m-actions{display:flex;gap:10px;justify-content:center}
-.m-confirm{background:var(--red);border:1px solid var(--red);border-radius:8px;color:#fff;padding:9px 20px;font-size:13px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;letter-spacing:1px}
-.m-cancel{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--text2);padding:9px 20px;font-size:13px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;letter-spacing:1px}
-.m-sent{color:var(--green);font-size:14px;font-weight:700}
-.page-title{font-size:18px;font-weight:800;letter-spacing:1px}
-.page-sub{font-size:12px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:0}
-.card-title{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:1.5px;margin-bottom:12px}
-.input-row{display:flex;gap:8px;margin-bottom:10px}
-input[type=text],input[type=tel]{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none}
-input[type=text]:focus,input[type=tel]:focus{border-color:var(--cyan)}
-select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;cursor:pointer}
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:1px;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
-.tbl td{font-size:12px;padding:7px 8px;border-bottom:1px solid var(--bg3);color:var(--text2)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--bg3)}
-.tog-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.tog-row:last-child{border-bottom:none}
-.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--border2);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
-.toggle.on{background:var(--green);border-color:var(--green)}
-.toggle-knob{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
-.toggle.on .toggle-knob{left:18px}
-.pattern-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
-.pbar-w{height:6px;background:var(--bg4);border-radius:3px;margin:6px 0 4px}
-.pbar{height:100%;border-radius:3px}
-.chip{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-family:'Share Tech Mono',monospace;margin:2px}
-.chip-r{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,92,.3)}
-.chip-b{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
-.chip-g{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,.25)}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:11px 16px;font-size:12px;font-family:'Share Tech Mono',monospace;z-index:300;display:none;animation:fi .2s}
-.toast.show{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCAMURAI Threat Intel v2.1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0b0f;
+      --bg2: #0f1117;
+      --bg3: #141720;
+      --bg4: #1a1e2b;
+      --border: #1e2438;
+      --border2: #2a3050;
+      --text: #e8ecf8;
+      --text2: #8b93b5;
+      --text3: #4a5278;
+      --red: #ff3b5c;
+      --orange: #ff6b35;
+      --yellow: #ffd23f;
+      --green: #00ff88;
+      --cyan: #00d4ff;
+      --purple: #a855f7;
+      --red-dim: rgba(255,59,92,0.15);
+      --orange-dim: rgba(255,107,53,0.12);
+      --green-dim: rgba(0,255,136,0.12);
+      --cyan-dim: rgba(0,212,255,0.1);
+    }
+    body {
+      font-family: Syne, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .mono { font-family: "Share Tech Mono", monospace; }
+    .dash {
+      display: grid;
+      grid-template-columns: 220px 1fr 300px;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      grid-row: 1 / 3;
+      overflow: hidden;
+    }
+    .right-panel {
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      padding: 14px;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg,var(--red),var(--orange));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .logo-text { font-weight: 800; font-size: 16px; letter-spacing: 1px; }
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 2px;
+    }
+    .nav-section {
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 2px;
+      font-family: "Share Tech Mono", monospace;
+      padding: 10px 0 4px;
+      margin-top: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      transition: all .2s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover {
+      background: var(--bg3);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .nav-item.active {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: rgba(255,59,92,0.3);
+    }
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text3);
+      flex-shrink: 0;
+    }
+    .nav-item.active .nav-dot {
+      background: var(--red);
+      box-shadow: 0 0 6px var(--red);
+    }
+    .bl-count-box {
+      margin-top: auto;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .sys-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-family: "Share Tech Mono", monospace;
+    }
+    .sdot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pg 2s infinite;
+      flex-shrink: 0;
+    }
+    .sdot.red {
+      background: var(--red);
+      animation: pr 1s infinite;
+    }
+    @keyframes pg {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,.45); }
+      50% { box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+    }
+    @keyframes pr {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,59,92,.45); }
+      50% { box-shadow: 0 0 0 8px rgba(255,59,92,0); }
+    }
+    .exotel-badge {
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0,212,255,.25);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--cyan);
+      font-family: "Share Tech Mono", monospace;
+    }
+    .clock {
+      font-family: "Share Tech Mono", monospace;
+      font-size: 13px;
+      color: var(--text2);
+      margin-left: auto;
+    }
+    .main {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .scen-strip {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+    }
+    .sc {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .sc:hover { border-color: var(--border2); transform: translateY(-1px); }
+    .sc.s0 { border-color: var(--red); background: var(--red-dim); }
+    .sc.s1 { border-color: var(--orange); background: var(--orange-dim); }
+    .sc.s2 { border-color: var(--purple); background: rgba(168,85,247,.12); }
+    .sc-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .b-ai { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,92,.3); }
+    .b-hu { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,107,53,.3); }
+    .b-dp { background: rgba(168,85,247,.15); color: var(--purple); border: 1px solid rgba(168,85,247,.3); }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 8px;
+    }
+    .metric {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .metric .lbl {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
+    }
+    .metric .val { font-size: 22px; font-weight: 800; }
+    .metric .ch {
+      font-size: 10px;
+      margin-top: 3px;
+      font-family: "Share Tech Mono", monospace;
+    }
+    .danger { color: var(--red); }
+    .warn { color: var(--yellow); }
+    .safe { color: var(--green); }
+    .info { color: var(--cyan); }
+    .wave-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .ph {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .pt { font-size: 13px; font-weight: 700; letter-spacing: .5px; }
+    .chart-area {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+    .risk-tag {
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: Rajdhani, sans-serif;
+      letter-spacing: 1px;
+    }
+    .risk-dangerous { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,92,.4); }
+    .risk-high { background: rgba(255,107,53,.15); color: var(--orange); border: 1px solid rgba(255,107,53,.3); }
+    .risk-medium { background: rgba(255,210,63,.12); color: var(--yellow); border: 1px solid rgba(255,210,63,.25); }
+    .risk-low { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
+    .play-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .pbtn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--red);
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+    .pbtn:hover { transform: scale(1.05); background: #e02e4e; }
+    .pbtn.playing { background: var(--orange); }
+    .prog-wrap {
+      flex: 1;
+      height: 4px;
+      background: var(--bg4);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+      min-width: 160px;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg,var(--red),var(--orange));
+      border-radius: 2px;
+    }
+    .prog-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: -3px;
+      box-shadow: 0 0 6px var(--red);
+    }
+    .sig-row {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 8px;
+    }
+    .sig-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .sig-name {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1px;
+    }
+    .sig-pct {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 3px 0;
+    }
+    .sig-bar-w {
+      height: 4px;
+      background: var(--bg4);
+      border-radius: 2px;
+      margin: 4px 0;
+      overflow: hidden;
+    }
+    .sig-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .8s ease;
+    }
+    .footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 7px 18px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      flex-shrink: 0;
+    }
+    .fdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .rp-sec {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gauge-lbl { font-size: 30px; font-weight: 800; margin-top: -8px; }
+    .gauge-sub {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1.5px;
+      margin-top: 2px;
+    }
+    .rp-ttl {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+    .thresh-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .thresh-row { display: flex; align-items: center; gap: 8px; }
+    .thresh-lbl {
+      font-size: 10px;
+      font-family: "Share Tech Mono", monospace;
+      color: var(--text3);
+      width: 68px;
+      flex-shrink: 0;
+    }
+    .thresh-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      background: var(--bg4);
+    }
+    .thresh-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+      cursor: pointer;
+    }
+    .thresh-val {
+      font-size: 11px;
+      font-family: "Share Tech Mono", monospace;
+      color: var(--cyan);
+      width: 26px;
+      text-align: right;
+    }
+    .t-area {
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .t-line {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+    .t-who {
+      font-size: 10px;
+      font-family: "Share Tech Mono", monospace;
+      padding: 2px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .t-caller { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,92,.3); }
+    .t-sys { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,212,255,.25); }
+    .t-txt { font-size: 11px; color: var(--text2); line-height: 1.5; flex: 1; }
+    .t-tm { font-size: 10px; color: var(--text3); font-family: "Share Tech Mono", monospace; flex-shrink: 0; }
+    .t-line.flag .t-txt { color: var(--red); }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: 1px solid;
+      margin-bottom: 5px;
+      font-size: 11px;
+    }
+    .a-red { background: var(--red-dim); border-color: rgba(255,59,92,.35); }
+    .a-yel { background: rgba(255,210,63,.1); border-color: rgba(255,210,63,.25); }
+    .a-green { background: var(--green-dim); border-color: rgba(0,255,136,.25); }
+    .act-btns { display: flex; flex-direction: column; gap: 7px; }
+    .btn {
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: Rajdhani, sans-serif;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all .2s;
+      text-align: center;
+      background: none;
+      color: inherit;
+      display: block;
+      width: 100%;
+    }
+    .btn-danger { background: var(--red)!important; border-color: var(--red)!important; color: #fff!important; }
+    .btn-danger:hover { opacity: .85; transform: scale(1.01); }
+    .btn-warn { border-color: var(--orange)!important; color: var(--orange)!important; }
+    .btn-warn:hover { background: var(--orange-dim); }
+    .btn-ghost { border-color: var(--border2)!important; color: var(--text2)!important; }
+    .btn-ghost:hover { background: var(--bg4); color: var(--text)!important; }
+    .btn-success { border-color: var(--green)!important; color: var(--green)!important; background: var(--green-dim)!important; }
+    .btn-upload { border-color: var(--cyan)!important; color: var(--cyan)!important; background: var(--cyan-dim)!important; }
+    .btn-upload:hover { opacity: .9; transform: scale(1.01); }
+    .bl-preview { display: flex; flex-direction: column; gap: 4px; max-height: 110px; overflow-y: auto; }
+    .bl-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 7px;
+      background: var(--bg4);
+      border-radius: 5px;
+    }
+    .bl-phone { font-size: 11px; font-family: "Share Tech Mono", monospace; color: var(--text2); }
+    .bl-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-family: "Share Tech Mono", monospace; }
+    .bl-ai { background: var(--red-dim); color: var(--red); }
+    .bl-human { background: var(--orange-dim); color: var(--orange); }
+    .bl-deep { background: rgba(168,85,247,.15); color: var(--purple); }
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--red);
+      border-radius: 16px;
+      padding: 26px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    .m-icon { font-size: 44px; margin-bottom: 10px; }
+    .m-title { font-size: 19px; font-weight: 800; color: var(--red); margin-bottom: 7px; }
+    .m-msg { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 18px; }
+    .m-actions { display: flex; gap: 10px; justify-content: center; }
+    .m-confirm, .m-cancel {
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: Rajdhani, sans-serif;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .m-confirm { background: var(--red); border: 1px solid var(--red); color: white; }
+    .m-cancel { background: none; border: 1px solid var(--border2); color: var(--text2); }
+    .m-sent { color: var(--green); font-size: 14px; font-weight: 700; }
+    .page-title { font-size: 18px; font-weight: 800; letter-spacing: 1px; }
+    .page-sub { font-size: 12px; color: var(--text3); font-family: "Share Tech Mono", monospace; margin-top: 2px; }
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 0;
+    }
+    .card-title {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+    .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    input[type="text"], input[type="tel"] {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 12px;
+      outline: none;
+    }
+    input[type="file"] {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text2);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    input[type="text"]:focus, input[type="tel"]:focus, input[type="file"]:focus { border-color: var(--cyan); outline: none; }
+    select {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1px;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .tbl td {
+      font-size: 12px;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--bg3);
+      color: var(--text2);
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: var(--bg3); }
+    .tog-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tog-row:last-child { border-bottom: none; }
+    .toggle {
+      width: 36px;
+      height: 20px;
+      border-radius: 10px;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      position: relative;
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--green); border-color: var(--green); }
+    .toggle-knob {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: left .2s;
+    }
+    .toggle.on .toggle-knob { left: 18px; }
+    .pattern-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .pbar-w { height: 6px; background: var(--bg4); border-radius: 3px; margin: 6px 0 4px; }
+    .pbar { height: 100%; border-radius: 3px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-family: "Share Tech Mono", monospace;
+      margin: 2px;
+    }
+    .chip-r { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,92,.3); }
+    .chip-b { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,212,255,.25); }
+    .chip-g { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 12px;
+      font-family: "Share Tech Mono", monospace;
+      z-index: 300;
+      display: none;
+      animation: fi .2s;
+    }
+    .toast.show { display: block; }
+    .upload-status {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: "Share Tech Mono", monospace;
+      line-height: 1.5;
+      border: 1px solid var(--border2);
+      background: var(--bg4);
+      color: var(--text2);
+      text-align: center;
+    }
+    .upload-status.good { background: var(--green-dim); border-color: rgba(0,255,136,.25); color: var(--green); }
+    .upload-status.bad { background: var(--red-dim); border-color: rgba(255,59,92,.3); color: var(--red); }
+    .upload-status.info { background: var(--cyan-dim); border-color: rgba(0,212,255,.25); color: var(--cyan); }
+    .upload-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .upload-center .btn {
+      max-width: 340px;
+    }
+    .upload-center .upload-status {
+      width: min(100%, 520px);
+    }
+    @keyframes fi {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 1200px) {
+      .dash { grid-template-columns: 200px 1fr 280px; }
+    }
+    @media (max-width: 980px) {
+      .dash {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr auto;
+        height: auto;
+        min-height: 100vh;
+      }
+      .sidebar, .center-col, .right-panel {
+        grid-row: auto;
+        grid-column: 1;
+      }
+      body { overflow: auto; }
+      .metrics-row, .sig-row, .scen-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const {useState,useEffect,useRef,useCallback}=React;
-const PLAY_DUR=30,BACKEND='http://localhost:5000';
+  <div id="root"></div>
 
-const SCENARIOS=[
-  {id:0,label:'AI BANK IMPERSONATION',callerType:'AI-LIKELY',number:'+91-9876543210',
-   scamScore:88,voiceMatch:0.82,deepfake:74,
-   signalLabels:['URGENCY','AUTHORITY','OTP REQUEST','VOICE CLONE'],
-   signals:[91,87,95,74],sigColors:['#ff3b5c','#ff6b35','#ffd23f','#a855f7'],
-   riskLevel:'DANGEROUS',riskClass:'risk-dangerous',
-   transcript:[
-     {who:'caller',text:'Your SBI account has been flagged for suspicious activity. You must verify now.',t:'0:03'},
-     {who:'caller',text:'Please do NOT disconnect or your account will be permanently blocked.',t:'0:09'},
-     {who:'caller',text:'Tell me the OTP sent to your registered mobile number immediately.',t:'0:16',flag:true},
-     {who:'caller',text:'I am RBI officer Rakesh Kumar. This is official protocol.',t:'0:22'},
-   ],
-   alerts:[{cls:'a-red',icon:'🚨',text:'OTP request detected — DO NOT SHARE',t:'0:16'},{cls:'a-red',icon:'🚨',text:'RBI impersonation detected',t:'0:22'},{cls:'a-yel',icon:'⚠',text:'Urgency pressure tactic active',t:'0:09'}],
-   gaugeColor:'#ff3b5c',waveBase:72},
-  {id:1,label:'HUMAN OTP / UPI FRAUD',callerType:'HUMAN-SCAMMER',number:'+91-8800112233',
-   scamScore:64,voiceMatch:0.91,deepfake:18,
-   signalLabels:['URGENCY','MONEY ASK','UPI PUSH','SOCIAL ENG'],
-   signals:[75,88,92,60],sigColors:['#ff6b35','#ff3b5c','#ff6b35','#ffd23f'],
-   riskLevel:'HIGH',riskClass:'risk-high',
-   transcript:[
-     {who:'caller',text:"Hi, I'm from Amazon. You won a prize of ₹50,000!",t:'0:02'},
-     {who:'caller',text:'To claim it, please send ₹199 processing fee via Google Pay.',t:'0:08'},
-     {who:'caller',text:'This offer expires in 10 minutes. UPI: payments@fraudster',t:'0:14',flag:true},
-     {who:'caller',text:"Don't tell anyone — it's a surprise reward just for you.",t:'0:20'},
-   ],
-   alerts:[{cls:'a-red',icon:'🚨',text:'UPI payment request detected',t:'0:14'},{cls:'a-yel',icon:'⚠',text:'Prize/reward lure tactic',t:'0:02'},{cls:'a-yel',icon:'⚠',text:'Secrecy pressure detected',t:'0:20'}],
-   gaugeColor:'#ff6b35',waveBase:50},
-  {id:2,label:'DEEPFAKE FAMILY IMPERSONATION',callerType:'VOICE-CLONE',number:'+91-9123456789',
-   scamScore:79,voiceMatch:0.37,deepfake:91,
-   signalLabels:['VOICE CLONE','FAMILY LURE','MONEY ASK','URGENCY'],
-   signals:[91,85,78,70],sigColors:['#a855f7','#ff3b5c','#ff6b35','#ffd23f'],
-   riskLevel:'DANGEROUS',riskClass:'risk-dangerous',
-   transcript:[
-     {who:'caller',text:"Mom, it's me — Rahul. I'm in trouble, please don't panic.",t:'0:03'},
-     {who:'caller',text:'I had an accident. I need ₹20,000 transferred right now.',t:'0:08',flag:true},
-     {who:'caller',text:"Please don't call my number, it's broken. Use this UPI.",t:'0:14'},
-     {who:'caller',text:'I love you. Please hurry, the hospital needs payment.',t:'0:19'},
-   ],
-   alerts:[{cls:'a-red',icon:'🚨',text:'DEEPFAKE VOICE DETECTED — 91% synthetic',t:'0:00'},{cls:'a-red',icon:'🚨',text:'Family impersonation pattern active',t:'0:03'},{cls:'a-yel',icon:'⚠',text:'Blocking real contact is a scam signal',t:'0:14'}],
-   gaugeColor:'#a855f7',waveBase:62},
-];
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
-function GaugeCanvas({score,color}){
-  const ref=useRef();
-  useEffect(()=>{
-    const c=ref.current;if(!c)return;
-    const ctx=c.getContext('2d');ctx.clearRect(0,0,200,120);
-    const cx=100,cy=110,r=78;ctx.lineWidth=13;ctx.lineCap='round';
-    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,2*Math.PI);ctx.stroke();
-    const g=ctx.createLinearGradient(cx-r,0,cx+r,0);
-    g.addColorStop(0,'#00ff88');g.addColorStop(0.5,'#ffd23f');g.addColorStop(1,color);
-    ctx.strokeStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,Math.PI+(score/100)*Math.PI);ctx.stroke();
-  },[score,color]);
-  return <canvas ref={ref} width={200} height={120}/>;
-}
+    const PLAYDUR = 30;
+    const BACKEND = "http://localhost:5000";
 
-function WaveCanvas({scenario,isPlaying,playPos}){
-  const ref=useRef(),phase=useRef(0),raf=useRef();
-  const draw=useCallback(()=>{
-    const c=ref.current;if(!c)return;
-    const W=c.parentElement.offsetWidth||500,H=140;
-    c.width=W;c.height=H;
-    const ctx=c.getContext('2d');ctx.clearRect(0,0,W,H);
-    phase.current+=isPlaying?0.04:0.008;
-    const N=100,amp=isPlaying?26:10,sf=scenario.scamScore/100,pts=[];
-    for(let i=0;i<N;i++){
-      const t=i/N,ph=phase.current;
-      const n=Math.sin(t*14+ph)*amp*sf+Math.sin(t*7-ph*1.3)*amp*0.5*sf+Math.sin(t*23+ph*2.1)*amp*0.3;
-      pts.push({x:(i/(N-1))*W,y:Math.max(8,Math.min(H-8,H*0.5+n))});
+    const NAV = {
+      DETECTION: ["Live Monitor", "Call History", "Voice Analysis"],
+      PROTECTION: ["Blacklist Registry", "Trusted Contacts", "Alert Config"],
+      INTEL: ["Threat Patterns", "AI Training Data", "Incident Export"]
+    };
+
+    const SCENARIOS = [
+      {
+        id: 0,
+        label: "AI BANK IMPERSONATION",
+        callerType: "AI-LIKELY",
+        number: "91-9876543210",
+        scamScore: 88,
+        voiceMatch: 0.82,
+        deepfake: 74,
+        signalLabels: ["URGENCY", "AUTHORITY", "OTP REQUEST", "VOICE CLONE"],
+        signals: [91, 87, 95, 74],
+        sigColors: ["#ff3b5c", "#ff6b35", "#ffd23f", "#a855f7"],
+        riskLevel: "DANGEROUS",
+        riskClass: "risk-dangerous",
+        transcript: [
+          { who: "caller", text: "Your SBI account has been flagged for suspicious activity. You must verify now.", t: "0:03" },
+          { who: "caller", text: "Please do NOT disconnect or your account will be permanently blocked.", t: "0:09" },
+          { who: "caller", text: "Tell me the OTP sent to your registered mobile number immediately.", t: "0:16", flag: true },
+          { who: "caller", text: "I am RBI officer Rakesh Kumar. This is official protocol.", t: "0:22" }
+        ],
+        alerts: [
+          { cls: "a-red", icon: "⚠", text: "OTP request detected — DO NOT SHARE", t: "0:16" },
+          { cls: "a-red", icon: "⚠", text: "RBI impersonation detected", t: "0:22" },
+          { cls: "a-yel", icon: "◉", text: "Urgency pressure tactic active", t: "0:09" }
+        ],
+        gaugeColor: "#ff3b5c",
+        waveBase: 72,
+        audio: "audio1.wav"
+      },
+      {
+        id: 1,
+        label: "HUMAN OTP UPI FRAUD",
+        callerType: "HUMAN-SCAMMER",
+        number: "91-8800112233",
+        scamScore: 64,
+        voiceMatch: 0.91,
+        deepfake: 18,
+        signalLabels: ["URGENCY", "MONEY ASK", "UPI PUSH", "SOCIAL ENG"],
+        signals: [75, 88, 92, 60],
+        sigColors: ["#ff6b35", "#ff3b5c", "#ff6b35", "#ffd23f"],
+        riskLevel: "HIGH",
+        riskClass: "risk-high",
+        transcript: [
+          { who: "caller", text: "Hi, I'm from Amazon. You won a prize of 50,000!", t: "0:02" },
+          { who: "caller", text: "To claim it, please send 199 processing fee via Google Pay.", t: "0:08" },
+          { who: "caller", text: "This offer expires in 10 minutes. UPI payments only.", t: "0:14", flag: true },
+          { who: "caller", text: "Don't tell anyone, it's a surprise reward just for you.", t: "0:20" }
+        ],
+        alerts: [
+          { cls: "a-red", icon: "⚠", text: "UPI payment request detected", t: "0:14" },
+          { cls: "a-yel", icon: "◉", text: "Prize/reward lure tactic", t: "0:02" },
+          { cls: "a-yel", icon: "◉", text: "Secrecy pressure detected", t: "0:20" }
+        ],
+        gaugeColor: "#ff6b35",
+        waveBase: 50,
+        audio: "audio3.wav"
+      },
+      {
+        id: 2,
+        label: "DEEPFAKE FAMILY IMPERSONATION",
+        callerType: "VOICE-CLONE",
+        number: "91-9123456789",
+        scamScore: 79,
+        voiceMatch: 0.37,
+        deepfake: 91,
+        signalLabels: ["VOICE CLONE", "FAMILY LURE", "MONEY ASK", "URGENCY"],
+        signals: [91, 85, 78, 70],
+        sigColors: ["#a855f7", "#ff3b5c", "#ff6b35", "#ffd23f"],
+        riskLevel: "DANGEROUS",
+        riskClass: "risk-dangerous",
+        transcript: [
+          { who: "caller", text: "Mom, it's me Rahul. I'm in trouble, please don't panic.", t: "0:03" },
+          { who: "caller", text: "I had an accident. I need 20,000 transferred right now.", t: "0:08", flag: true },
+          { who: "caller", text: "Please don't call my number, it's broken. Use this UPI.", t: "0:14" },
+          { who: "caller", text: "I love you. Please hurry, the hospital needs payment.", t: "0:19" }
+        ],
+        alerts: [
+          { cls: "a-red", icon: "⚠", text: "DEEPFAKE VOICE DETECTED 91% synthetic", t: "0:00" },
+          { cls: "a-red", icon: "⚠", text: "Family impersonation pattern active", t: "0:03" },
+          { cls: "a-yel", icon: "◉", text: "Blocking real contact is a scam signal", t: "0:14" }
+        ],
+        gaugeColor: "#a855f7",
+        waveBase: 62,
+        audio: "audio2.wav"
+      }
+    ];
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
     }
-    const g=ctx.createLinearGradient(0,0,W,0);
-    g.addColorStop(0,'rgba(255,59,92,0.2)');g.addColorStop(0.5,'rgba(255,107,53,0.6)');g.addColorStop(1,'rgba(255,59,92,0.9)');
-    ctx.beginPath();ctx.moveTo(0,H);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(W,H);ctx.closePath();
-    const fg=ctx.createLinearGradient(0,0,0,H);fg.addColorStop(0,'rgba(255,59,92,0.16)');fg.addColorStop(1,'rgba(255,59,92,0)');
-    ctx.fillStyle=fg;ctx.fill();
-    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
-    for(let i=1;i<pts.length;i++){const mx=(pts[i-1].x+pts[i].x)/2,my=(pts[i-1].y+pts[i].y)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,mx,my);}
-    ctx.strokeStyle=g;ctx.lineWidth=2.5;ctx.stroke();
-    if(isPlaying&&playPos>0){
-      const px=(playPos/PLAY_DUR)*W;
-      ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,H);ctx.stroke();
-      const ni=Math.min(Math.floor((playPos/PLAY_DUR)*(N-1)),N-1);
-      ctx.beginPath();ctx.arc(px,pts[ni].y,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+
+    function average(arr) {
+      if (!arr || !arr.length) return 0;
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
-    raf.current=requestAnimationFrame(draw);
-  },[scenario,isPlaying,playPos]);
-  useEffect(()=>{raf.current=requestAnimationFrame(draw);return()=>cancelAnimationFrame(raf.current);},[draw]);
-  return <canvas ref={ref} style={{width:'100%',height:'100%',display:'block'}}/>;
-}
 
-function ThresholdGauge({thresholds,onChange,currentScore}){
-  const getRiskLbl=s=>s>=thresholds.dangerous?'DANGER':s>=thresholds.high?'HIGH':s>=thresholds.medium?'MEDIUM':'LOW';
-  const getRiskColor=s=>s>=thresholds.dangerous?'var(--red)':s>=thresholds.high?'var(--orange)':s>=thresholds.medium?'var(--yellow)':'var(--green)';
-  return(
-    <div className="thresh-wrap">
-      <div style={{position:'relative',height:18,borderRadius:9,overflow:'hidden',background:'var(--bg4)',marginBottom:8}}>
-        <div style={{position:'absolute',left:0,width:`${thresholds.medium}%`,height:'100%',background:'#00ff88',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.medium}%`,width:`${Math.max(0,thresholds.high-thresholds.medium)}%`,height:'100%',background:'#ffd23f',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.high}%`,width:`${Math.max(0,thresholds.dangerous-thresholds.high)}%`,height:'100%',background:'#ff6b35',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.dangerous}%`,right:0,height:'100%',background:'#ff3b5c',opacity:.7}}/>
-        {[thresholds.medium,thresholds.high,thresholds.dangerous].map((v,i)=>(
-          <div key={i} style={{position:'absolute',left:`${v}%`,top:0,width:2,height:'100%',background:'#fff',opacity:.8,transform:'translateX(-1px)'}}/>
-        ))}
-        {/* Score needle */}
-        <div style={{position:'absolute',left:`${currentScore}%`,top:-2,width:3,height:'calc(100% + 4px)',background:'#fff',borderRadius:2,boxShadow:'0 0 6px rgba(255,255,255,.8)',transform:'translateX(-1.5px)',zIndex:2}}/>
-      </div>
-      {[{label:'SAFE→MED',key:'medium',min:10,max:60},{label:'MED→HIGH',key:'high',min:35,max:80},{label:'HIGH→DNG',key:'dangerous',min:55,max:95}].map(row=>(
-        <div className="thresh-row" key={row.key}>
-          <span className="thresh-lbl">{row.label}</span>
-          <input type="range" className="thresh-slider" min={row.min} max={row.max} value={thresholds[row.key]}
-            onChange={e=>onChange(row.key,+e.target.value)}/>
-          <span className="thresh-val">{thresholds[row.key]}</span>
+    function riskFromScore(score, thresholds) {
+      if (score >= thresholds.dangerous) return { label: "DANGEROUS", cls: "risk-dangerous", color: "#ff3b5c" };
+      if (score >= thresholds.high) return { label: "HIGH", cls: "risk-high", color: "#ff6b35" };
+      if (score >= thresholds.medium) return { label: "MEDIUM", cls: "risk-medium", color: "#ffd23f" };
+      return { label: "LOW", cls: "risk-low", color: "#00ff88" };
+    }
+
+    function getColorForScore(score, thresholds) {
+      return riskFromScore(score, thresholds).color;
+    }
+
+    function GaugeCanvas({ score, color }) {
+      const ref = useRef(null);
+
+      useEffect(() => {
+        const c = ref.current;
+        if (!c) return;
+        const ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, 200, 120);
+
+        const cx = 100, cy = 110, r = 78;
+        ctx.lineWidth = 13;
+        ctx.lineCap = "round";
+
+        ctx.strokeStyle = "rgba(255,255,255,0.06)";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI);
+        ctx.stroke();
+
+        const g = ctx.createLinearGradient(cx - r, 0, cx + r, 0);
+        g.addColorStop(0, "#00ff88");
+        g.addColorStop(0.5, "#ffd23f");
+        g.addColorStop(1, color);
+        ctx.strokeStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, Math.PI, Math.PI + (score / 100) * Math.PI);
+        ctx.stroke();
+      }, [score, color]);
+
+      return <canvas ref={ref} width="200" height="120" />;
+    }
+
+    function WaveCanvas({ score, isPlaying, playPos }) {
+      const ref = useRef(null);
+      const phase = useRef(0);
+      const raf = useRef(null);
+
+      const draw = useCallback(() => {
+        const c = ref.current;
+        if (!c) return;
+
+        const W = c.parentElement.offsetWidth || 500;
+        const H = 140;
+        c.width = W;
+        c.height = H;
+        const ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, W, H);
+
+        phase.current += isPlaying ? 0.04 : 0.01;
+
+        const N = 100;
+        const amp = isPlaying ? (12 + (score / 100) * 18) : (8 + (score / 100) * 5);
+        const sf = score / 100;
+        const pts = [];
+
+        for (let i = 0; i < N; i++) {
+          const t = i / N;
+          const ph = phase.current;
+          const n =
+            Math.sin(t * 14 + ph) * amp * sf +
+            Math.sin(t * 7 - ph * 1.3) * amp * 0.5 * sf +
+            Math.sin(t * 23 + ph * 2.1) * amp * 0.3;
+          pts.push({
+            x: (i / (N - 1)) * W,
+            y: Math.max(8, Math.min(H - 8, H * 0.5 - n))
+          });
+        }
+
+        const strokeGrad = ctx.createLinearGradient(0, 0, W, 0);
+        strokeGrad.addColorStop(0, "rgba(255,59,92,0.2)");
+        strokeGrad.addColorStop(0.5, "rgba(255,107,53,0.6)");
+        strokeGrad.addColorStop(1, "rgba(255,59,92,0.9)");
+
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        pts.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(W, H);
+        ctx.closePath();
+
+        const fillGrad = ctx.createLinearGradient(0, 0, 0, H);
+        fillGrad.addColorStop(0, "rgba(255,59,92,0.16)");
+        fillGrad.addColorStop(1, "rgba(255,59,92,0)");
+        ctx.fillStyle = fillGrad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          const mx = (pts[i - 1].x + pts[i].x) / 2;
+          const my = (pts[i - 1].y + pts[i].y) / 2;
+          ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, mx, my);
+        }
+        ctx.strokeStyle = strokeGrad;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        if (isPlaying && playPos > 0) {
+          const px = (playPos / PLAYDUR) * W;
+          ctx.strokeStyle = "rgba(255,255,255,0.3)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(px, 0);
+          ctx.lineTo(px, H);
+          ctx.stroke();
+
+          const ni = Math.min(Math.floor((playPos / PLAYDUR) * (N - 1)), N - 1);
+          ctx.beginPath();
+          ctx.arc(px, pts[ni].y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "#fff";
+          ctx.fill();
+        }
+
+        raf.current = requestAnimationFrame(draw);
+      }, [isPlaying, playPos, score]);
+
+      useEffect(() => {
+        raf.current = requestAnimationFrame(draw);
+        return () => cancelAnimationFrame(raf.current);
+      }, [draw]);
+
+      return <canvas ref={ref} style={{ width: "100%", height: "100%", display: "block" }} />;
+    }
+
+    function ThresholdGauge({ thresholds, onChange, currentScore }) {
+      const getRiskLbl = s => s >= thresholds.dangerous ? "DANGER" : s >= thresholds.high ? "HIGH" : s >= thresholds.medium ? "MEDIUM" : "LOW";
+      const getRiskColor = s => s >= thresholds.dangerous ? "var(--red)" : s >= thresholds.high ? "var(--orange)" : s >= thresholds.medium ? "var(--yellow)" : "var(--green)";
+
+      return (
+        <div className="thresh-wrap">
+          <div style={{ position: "relative", height: 18, borderRadius: 9, overflow: "hidden", background: "var(--bg4)", marginBottom: 8 }}>
+            <div style={{ position: "absolute", left: 0, width: thresholds.medium + "%", height: "100%", background: "#00ff88", opacity: 0.7 }} />
+            <div style={{ position: "absolute", left: thresholds.medium + "%", width: Math.max(0, thresholds.high - thresholds.medium) + "%", height: "100%", background: "#ffd23f", opacity: 0.7 }} />
+            <div style={{ position: "absolute", left: thresholds.high + "%", width: Math.max(0, thresholds.dangerous - thresholds.high) + "%", height: "100%", background: "#ff6b35", opacity: 0.7 }} />
+            <div style={{ position: "absolute", left: thresholds.dangerous + "%", right: 0, height: "100%", background: "#ff3b5c", opacity: 0.7 }} />
+            {[thresholds.medium, thresholds.high, thresholds.dangerous].map((v, i) => (
+              <div key={i} style={{ position: "absolute", left: v + "%", top: 0, width: 2, height: "100%", background: "#fff", opacity: 0.8, transform: "translateX(-1px)" }} />
+            ))}
+            <div style={{ position: "absolute", left: currentScore + "%", top: -2, width: 3, height: "calc(100% + 4px)", background: "#fff", borderRadius: 2, boxShadow: "0 0 6px rgba(255,255,255,.8)", transform: "translateX(-1.5px)", zIndex: 2 }} />
+          </div>
+
+          {[
+            { label: "SAFE-MED", key: "medium", min: 10, max: 60 },
+            { label: "MED-HIGH", key: "high", min: 35, max: 80 },
+            { label: "HIGH-DNG", key: "dangerous", min: 55, max: 95 }
+          ].map(row => (
+            <div className="thresh-row" key={row.key}>
+              <span className="thresh-lbl">{row.label}</span>
+              <input
+                type="range"
+                className="thresh-slider"
+                min={row.min}
+                max={row.max}
+                value={thresholds[row.key]}
+                onChange={e => onChange(row.key, Number(e.target.value))}
+              />
+              <span className="thresh-val">{thresholds[row.key]}</span>
+            </div>
+          ))}
+
+          <div style={{ marginTop: 6, padding: "5px 8px", background: "var(--bg4)", borderRadius: 6, textAlign: "center", fontSize: 11, fontFamily: "Share Tech Mono, monospace", color: "var(--text3)" }}>
+            SCORE {Math.round(currentScore)} <span style={{ color: getRiskColor(currentScore), fontWeight: 700 }}>{getRiskLbl(currentScore)}</span>
+          </div>
         </div>
-      ))}
-      <div style={{marginTop:6,padding:'5px 8px',background:'var(--bg4)',borderRadius:6,textAlign:'center',fontSize:11,fontFamily:'Share Tech Mono,monospace',color:'var(--text3)'}}>
-        SCORE {currentScore} → <span style={{color:getRiskColor(currentScore),fontWeight:700}}>{getRiskLbl(currentScore)}</span>
-      </div>
-    </div>
-  );
-}
+      );
+    }
 
-// --- Sub-pages ---
-function CallHistoryPage({history,blacklist,onBlacklist}){
-  const rc={DANGEROUS:'var(--red)',HIGH:'var(--orange)',MEDIUM:'var(--yellow)',LOW:'var(--green)',SAFE:'var(--green)'};
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">CALL HISTORY</div><div className="page-sub">{history.length} records this session</div></div>
-    <div className="card"><div className="card-title">RECENT CALLS</div>
-      <table className="tbl"><thead><tr><th>NUMBER</th><th>TYPE</th><th>SCORE</th><th>RISK</th><th>DURATION</th><th>ACTION</th></tr></thead>
-      <tbody>{history.map((h,i)=>{const bl=blacklist.find(b=>b.num===h.num);return(
-        <tr key={i}>
-          <td style={{fontFamily:'Share Tech Mono,monospace',color:'var(--cyan)',fontSize:11}}>{h.num}</td>
-          <td style={{fontSize:11,color:h.type==='SAFE'?'var(--green)':'var(--red)',fontFamily:'Share Tech Mono,monospace'}}>{h.type}</td>
-          <td style={{fontWeight:700,color:rc[h.risk]||'var(--text)',fontFamily:'Share Tech Mono,monospace'}}>{h.score}</td>
-          <td style={{fontSize:11,color:rc[h.risk]||'var(--text)',fontFamily:'Share Tech Mono,monospace'}}>{h.risk}</td>
-          <td style={{fontFamily:'Share Tech Mono,monospace',fontSize:11}}>{h.duration}</td>
-          <td><span style={{cursor:bl?'default':'pointer',fontSize:11,color:bl?'var(--green)':'var(--orange)',fontFamily:'Share Tech Mono,monospace'}} onClick={()=>!bl&&onBlacklist(h.num,h.type)}>{bl?'✓ BL':'+ BL'}</span></td>
-        </tr>
-      );})}</tbody></table>
-    </div>
-  </div>;
-}
-
-function VoiceAnalysisPage(){
-  const mx=[{l:'PITCH VARIANCE',v:'HIGH',c:'var(--red)',s:'Unnatural monotone'},{l:'BREATHING PATTERN',v:'ABSENT',c:'var(--red)',s:'No breath sounds'},{l:'BACKGROUND NOISE',v:'SYNTHETIC',c:'var(--orange)',s:'Generated ambient'},{l:'RESPONSE LATENCY',v:'12ms',c:'var(--green)',s:'Within human range'},{l:'VOICE STRESS',v:'91%',c:'var(--red)',s:'Extreme urgency markers'},{l:'EMOTION MATCH',v:'37%',c:'var(--orange)',s:'Emotion-context mismatch'}];
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">VOICE ANALYSIS</div><div className="page-sub">Acoustic & behavioral signals</div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
-      {mx.map((m,i)=><div className="card" key={i}><div className="card-title">{m.l}</div><div style={{fontSize:20,fontWeight:800,color:m.c,fontFamily:'Share Tech Mono,monospace'}}>{m.v}</div><div style={{fontSize:11,color:'var(--text3)',marginTop:4}}>{m.s}</div></div>)}
-    </div>
-    <div className="card"><div className="card-title">MFCC FINGERPRINT</div>
-      <div style={{display:'flex',gap:2,alignItems:'flex-end',height:50}}>
-        {Array.from({length:40},(_,i)=>{const h=25+Math.sin(i*.7)*12+((i*17+3)%23);return <div key={i} style={{flex:1,height:`${h}%`,background:`rgba(255,59,92,${.3+h/100*.6})`,borderRadius:2,minWidth:0}}/>;})}</div>
-      <div style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',marginTop:5}}>MEL-FREQUENCY CEPSTRAL COEFFICIENTS — ANOMALY AT BINS 12–18</div>
-    </div>
-  </div>;
-}
-
-function BlacklistPage({blacklist,onRemove,onAdd}){
-  const [num,setNum]=useState(''),[type,setType]=useState('AI');
-  const add=()=>{if(!num.trim())return;const m={AI:'bl-ai',HUMAN:'bl-human',DEEPFAKE:'bl-deep'};onAdd({num:num.trim(),type,cls:m[type]});setNum('');};
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">BLACKLIST REGISTRY</div><div className="page-sub">{blacklist.length} numbers blocked</div></div>
-    <div className="card"><div className="card-title">ADD NUMBER</div>
-      <div className="input-row">
-        <input type="tel" placeholder="+91-XXXXXXXXXX" value={num} onChange={e=>setNum(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()}/>
-        <select value={type} onChange={e=>setType(e.target.value)}><option>AI</option><option>HUMAN</option><option>DEEPFAKE</option></select>
-        <button className="btn btn-danger" style={{padding:'8px 14px',whiteSpace:'nowrap'}} onClick={add}>+ ADD</button>
-      </div>
-    </div>
-    <div className="card"><div className="card-title">BLOCKED — {blacklist.length}</div>
-      {blacklist.length===0?<div style={{textAlign:'center',padding:24,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',fontSize:12}}>NO NUMBERS BLACKLISTED</div>:(
-        <table className="tbl"><thead><tr><th>NUMBER</th><th>TYPE</th><th>ACTION</th></tr></thead>
-        <tbody>{blacklist.map((b,i)=><tr key={i}>
-          <td style={{fontFamily:'Share Tech Mono,monospace',color:'var(--cyan)',fontSize:11}}>{b.num}</td>
-          <td><span className={`chip ${b.cls==='bl-ai'?'chip-r':b.cls==='bl-deep'?'chip-r':'chip-r'}`} style={{color:b.cls==='bl-human'?'var(--orange)':'',background:b.cls==='bl-human'?'var(--orange-dim)':''}}>{b.type}</span></td>
-          <td><span style={{cursor:'pointer',color:'var(--red)',fontSize:11,fontFamily:'Share Tech Mono,monospace'}} onClick={()=>onRemove(b.num)}>✕ REMOVE</span></td>
-        </tr>)}</tbody></table>
-      )}
-    </div>
-  </div>;
-}
-
-function TrustedContactsPage({contacts,onToggle,onAdd,onRemove}){
-  const [name,setName]=useState(''),[phone,setPhone]=useState('');
-  const add=()=>{if(!name||!phone)return;onAdd({name,phone,notify:true});setName('');setPhone('');};
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">TRUSTED CONTACTS</div><div className="page-sub">Emergency notification recipients</div></div>
-    <div className="card"><div className="card-title">ADD CONTACT</div>
-      <div className="input-row">
-        <input type="text" placeholder="Name" value={name} onChange={e=>setName(e.target.value)}/>
-        <input type="tel" placeholder="+91-XXXXXXXXXX" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()}/>
-        <button className="btn btn-danger" style={{padding:'8px 14px',whiteSpace:'nowrap'}} onClick={add}>+ ADD</button>
-      </div>
-    </div>
-    <div className="card"><div className="card-title">CONTACTS — {contacts.length}</div>
-      {contacts.map((c,i)=><div className="tog-row" key={i}>
-        <div><div style={{fontSize:13,color:'var(--text)'}}>{c.name}</div><div style={{fontSize:11,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',marginTop:2}}>{c.phone}</div></div>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div className={`toggle${c.notify?' on':''}`} onClick={()=>onToggle(i)}><div className="toggle-knob"/></div>
-          <span style={{cursor:'pointer',color:'var(--red)',fontSize:12,fontFamily:'Share Tech Mono,monospace'}} onClick={()=>onRemove(i)}>✕</span>
+    function CallHistoryPage({ history, blacklist, onBlacklist }) {
+      const rc = { DANGEROUS: "var(--red)", HIGH: "var(--orange)", MEDIUM: "var(--yellow)", LOW: "var(--green)", SAFE: "var(--green)" };
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">CALL HISTORY</div>
+            <div className="page-sub">{history.length} records this session</div>
+          </div>
+          <div className="card">
+            <div className="card-title">RECENT CALLS</div>
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>NUMBER</th><th>TYPE</th><th>SCORE</th><th>RISK</th><th>DURATION</th><th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((h, i) => {
+                  const bl = blacklist.find(b => b.num === h.num);
+                  return (
+                    <tr key={i}>
+                      <td style={{ fontFamily: "Share Tech Mono, monospace", color: "var(--cyan)", fontSize: 11 }}>{h.num}</td>
+                      <td style={{ fontSize: 11, color: h.type === "SAFE" ? "var(--green)" : "var(--red)", fontFamily: "Share Tech Mono, monospace" }}>{h.type}</td>
+                      <td style={{ fontWeight: 700, color: rc[h.risk] || "var(--text)", fontFamily: "Share Tech Mono, monospace" }}>{h.score}</td>
+                      <td style={{ fontSize: 11, color: rc[h.risk] || "var(--text)", fontFamily: "Share Tech Mono, monospace" }}>{h.risk}</td>
+                      <td style={{ fontFamily: "Share Tech Mono, monospace", fontSize: 11 }}>{h.duration}</td>
+                      <td>
+                        <span
+                          style={{ cursor: bl ? "default" : "pointer", fontSize: 11, color: bl ? "var(--green)" : "var(--orange)", fontFamily: "Share Tech Mono, monospace" }}
+                          onClick={() => !bl && onBlacklist(h.num, h.type)}
+                        >
+                          BL
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>)}
-    </div>
-  </div>;
-}
+      );
+    }
 
-function AlertConfigPage({thresholds,onChange,toggles,onToggle}){
-  const rules=[{k:'otp',l:'OTP Request Detection',s:'Alert when OTP requested'},{k:'impersonation',l:'Authority Impersonation',s:'RBI/Bank/Police alerts'},{k:'deepfake',l:'Deepfake Voice Detection',s:'Synthetic voice alerts'},{k:'upi',l:'UPI Payment Requests',s:'Money transfer detection'},{k:'emergency',l:'Auto Emergency Alert',s:'Auto-notify at DANGEROUS level'}];
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">ALERT CONFIG</div><div className="page-sub">Detection rules and thresholds</div></div>
-    <div className="card"><div className="card-title">RISK SCORE THRESHOLDS</div>
-      <div style={{position:'relative',height:18,borderRadius:9,overflow:'hidden',background:'var(--bg4)',marginBottom:12}}>
-        <div style={{position:'absolute',left:0,width:`${thresholds.medium}%`,height:'100%',background:'#00ff88',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.medium}%`,width:`${Math.max(0,thresholds.high-thresholds.medium)}%`,height:'100%',background:'#ffd23f',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.high}%`,width:`${Math.max(0,thresholds.dangerous-thresholds.high)}%`,height:'100%',background:'#ff6b35',opacity:.7}}/>
-        <div style={{position:'absolute',left:`${thresholds.dangerous}%`,right:0,height:'100%',background:'#ff3b5c',opacity:.7}}/>
-      </div>
-      {[{label:'SAFE→MEDIUM',key:'medium',min:10,max:60},{label:'MEDIUM→HIGH',key:'high',min:35,max:80},{label:'HIGH→DANGER',key:'dangerous',min:55,max:95}].map(row=>(
-        <div className="thresh-row" key={row.key}>
-          <span className="thresh-lbl">{row.label}</span>
-          <input type="range" className="thresh-slider" min={row.min} max={row.max} value={thresholds[row.key]} onChange={e=>onChange(row.key,+e.target.value)}/>
-          <span className="thresh-val">{thresholds[row.key]}</span>
+    function VoiceAnalysisPage() {
+      const mx = [
+        { l: "PITCH VARIANCE", v: "HIGH", c: "var(--red)", s: "Unnatural monotone" },
+        { l: "BREATHING PATTERN", v: "ABSENT", c: "var(--red)", s: "No breath sounds" },
+        { l: "BACKGROUND NOISE", v: "SYNTHETIC", c: "var(--orange)", s: "Generated ambient" },
+        { l: "RESPONSE LATENCY", v: "12ms", c: "var(--green)", s: "Within human range" },
+        { l: "VOICE STRESS", v: "91", c: "var(--red)", s: "Extreme urgency markers" },
+        { l: "EMOTION MATCH", v: "37", c: "var(--orange)", s: "Emotion-context mismatch" }
+      ];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">VOICE ANALYSIS</div>
+            <div className="page-sub">Acoustic behavioral signals</div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+            {mx.map((m, i) => (
+              <div className="card" key={i}>
+                <div className="card-title">{m.l}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: m.c, fontFamily: "Share Tech Mono, monospace" }}>{m.v}</div>
+                <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>{m.s}</div>
+              </div>
+            ))}
+          </div>
+          <div className="card">
+            <div className="card-title">MFCC FINGERPRINT</div>
+            <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 50 }}>
+              {Array.from({ length: 40 }, (_, i) => {
+                const h = 25 + Math.sin(i * 0.7) * 12 + ((i * 17) % 3) * 23;
+                return <div key={i} style={{ flex: 1, height: h, background: `rgba(255,59,92,${h / 100 * 0.6})`, borderRadius: 2, minWidth: 0 }} />;
+              })}
+            </div>
+            <div style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", marginTop: 5 }}>
+              MEL-FREQUENCY CEPSTRAL COEFFICIENTS ANOMALY AT BINS 12–18
+            </div>
+          </div>
         </div>
-      ))}
-      <div style={{marginTop:8,fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace'}}>ZONES: 0–{thresholds.medium} LOW · {thresholds.medium}–{thresholds.high} MEDIUM · {thresholds.high}–{thresholds.dangerous} HIGH · {thresholds.dangerous}–100 DANGEROUS</div>
-    </div>
-    <div className="card"><div className="card-title">ALERT RULES</div>
-      {rules.map(a=><div className="tog-row" key={a.k}>
-        <div><div style={{fontSize:13,color:'var(--text)'}}>{a.l}</div><div style={{fontSize:11,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',marginTop:2}}>{a.s}</div></div>
-        <div className={`toggle${toggles[a.k]?' on':''}`} onClick={()=>onToggle(a.k)}><div className="toggle-knob"/></div>
-      </div>)}
-    </div>
-  </div>;
-}
+      );
+    }
 
-function ThreatPatternsPage(){
-  const p=[{n:'OTP Harvesting',v:87,t:'+12%',c:'#ff3b5c',d:'Caller demands OTP under urgency'},{n:'RBI/Bank Impersonation',v:74,t:'+8%',c:'#ff6b35',d:'Impersonates government officials'},{n:'Family Emergency Lure',v:61,t:'+23%',c:'#a855f7',d:'Deepfake voices of relatives'},{n:'Prize/Reward Scam',v:55,t:'-3%',c:'#ffd23f',d:'Fake lottery notifications'},{n:'UPI Transfer Fraud',v:69,t:'+15%',c:'#ff3b5c',d:'Small "processing" payments'}];
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">THREAT PATTERNS</div><div className="page-sub">Detected scam tactics and trends</div></div>
-    {p.map((x,i)=><div className="pattern-card" key={i}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <div style={{fontSize:13,fontWeight:700}}>{x.n}</div>
-        <span style={{fontSize:11,color:x.t.startsWith('+')?'var(--red)':'var(--green)',fontFamily:'Share Tech Mono,monospace'}}>{x.t} this week</span>
-      </div>
-      <div style={{fontSize:11,color:'var(--text3)',margin:'3px 0 5px'}}>{x.d}</div>
-      <div className="pbar-w"><div className="pbar" style={{width:`${x.v}%`,background:x.c}}/></div>
-      <div style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace'}}>{x.v}% PREVALENCE</div>
-    </div>)}
-  </div>;
-}
+    function BlacklistPage({ blacklist, onRemove, onAdd }) {
+      const [num, setNum] = useState("");
+      const [type, setType] = useState("AI");
 
-function TrainingDataPage(){
-  const s=[{id:'TRN-001',type:'AI',score:91,label:'CONFIRMED SCAM',tags:['OTP','BANK']},{id:'TRN-002',type:'HUMAN',score:67,label:'CONFIRMED SCAM',tags:['UPI','PRIZE']},{id:'TRN-003',type:'DEEPFAKE',score:83,label:'CONFIRMED SCAM',tags:['FAMILY','VOICE']},{id:'TRN-004',type:'SAFE',score:8,label:'FALSE POSITIVE',tags:['LEGIT']}];
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">AI TRAINING DATA</div><div className="page-sub">Labeled incidents for model improvement</div></div>
-    <div className="card"><div className="card-title">TRAINING SAMPLES — {s.length}</div>
-      <table className="tbl"><thead><tr><th>ID</th><th>TYPE</th><th>SCORE</th><th>LABEL</th><th>TAGS</th></tr></thead>
-      <tbody>{s.map((x,i)=><tr key={i}>
-        <td style={{fontFamily:'Share Tech Mono,monospace',color:'var(--cyan)',fontSize:11}}>{x.id}</td>
-        <td style={{color:x.type==='SAFE'?'var(--green)':'var(--red)',fontSize:11,fontFamily:'Share Tech Mono,monospace'}}>{x.type}</td>
-        <td style={{fontFamily:'Share Tech Mono,monospace',fontWeight:700,color:x.score>70?'var(--red)':x.score>40?'var(--yellow)':'var(--green)'}}>{x.score}</td>
-        <td style={{fontSize:11,color:x.label==='FALSE POSITIVE'?'var(--yellow)':'var(--text2)'}}>{x.label}</td>
-        <td>{x.tags.map(t=><span key={t} className="chip chip-b" style={{fontSize:9,padding:'1px 5px'}}>{t}</span>)}</td>
-      </tr>)}</tbody></table>
-    </div>
-  </div>;
-}
+      const add = () => {
+        if (!num.trim()) return;
+        const m = { AI: "bl-ai", HUMAN: "bl-human", DEEPFAKE: "bl-deep" };
+        onAdd({ num: num.trim(), type, cls: m[type] });
+        setNum("");
+      };
 
-function IncidentExportPage({history,blacklist,toast}){
-  const dl=(data,name)=>{const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();};
-  const csv=()=>{const r=[['Number','Type','Score','Risk','Duration'],...history.map(h=>[h.num,h.type,h.score,h.risk,h.duration])];const b=new Blob([r.map(x=>x.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`scamurai_calls_${Date.now()}.csv`;a.click();toast('📊 CSV exported');};
-  return <div style={{display:'flex',flexDirection:'column',gap:12}}>
-    <div><div className="page-title">INCIDENT EXPORT</div><div className="page-sub">Download session data</div></div>
-    <div className="card"><div className="card-title">EXPORT OPTIONS</div>
-      <div style={{display:'flex',flexDirection:'column',gap:8}}>
-        <button className="btn btn-danger" onClick={()=>{dl({time:new Date().toISOString(),call_history:history,blacklist},`scamurai_session_${Date.now()}.json`);toast('📤 Full session exported');}}>📤 EXPORT FULL SESSION REPORT (JSON)</button>
-        <button className="btn btn-warn" onClick={csv}>📊 EXPORT CALL LOG (CSV)</button>
-        <button className="btn btn-ghost" onClick={()=>{window.print();toast('🖨 Print dialog opened');}}>🖨 PRINT INCIDENT REPORT</button>
-      </div>
-    </div>
-    <div className="card"><div className="card-title">SESSION SUMMARY</div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,textAlign:'center'}}>
-        {[['TOTAL CALLS',history.length,'var(--cyan)'],['SCAMS FLAGGED',history.filter(c=>c.risk!=='LOW').length,'var(--red)'],['BL NUMBERS',blacklist.length,'var(--orange)']].map(([k,v,c])=>(
-          <div key={k}><div style={{fontSize:26,fontWeight:800,color:c}}>{v}</div><div style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',letterSpacing:1}}>{k}</div></div>
-        ))}
-      </div>
-    </div>
-  </div>;
-}
-
-// === MAIN APP ===
-function App(){
-  const [page,setPage]=useState('Live Monitor');
-  const [scenIdx,setScenIdx]=useState(0);
-  const [isPlaying,setIsPlaying]=useState(false);
-  const [playPos,setPlayPos]=useState(0);
-  const [callSecs,setCallSecs]=useState(0);
-  const [transcript,setTranscript]=useState([{who:'system',text:'Waiting for call to begin...',t:'0:00'}]);
-  const [blacklist,setBlacklist]=useState([{num:'+91-9876543210',type:'AI',cls:'bl-ai'},{num:'+91-8800112233',type:'HUMAN',cls:'bl-human'},{num:'+91-9123456789',type:'DEEPFAKE',cls:'bl-deep'},{num:'+91-7777888999',type:'HUMAN',cls:'bl-human'}]);
-  const [contacts,setContacts]=useState([{name:'Priya (Daughter)',phone:'+91-9999000001',notify:true},{name:'Rajesh (Son)',phone:'+91-9999000002',notify:true},{name:'Dr. Sharma',phone:'+91-9999000003',notify:false}]);
-  const [history]=useState([{num:'+91-9876543210',type:'AI',score:88,risk:'DANGEROUS',duration:'0:30'},{num:'+91-8800112233',type:'HUMAN',score:64,risk:'HIGH',duration:'0:24'},{num:'+91-9123456789',type:'DEEPFAKE',score:79,risk:'DANGEROUS',duration:'0:19'},{num:'+91-7011223344',type:'SAFE',score:12,risk:'LOW',duration:'1:45'},{num:'+91-6100099900',type:'HUMAN',score:51,risk:'MEDIUM',duration:'0:38'}]);
-  const [showNotif,setShowNotif]=useState(false);
-  const [notifSent,setNotifSent]=useState(false);
-  const [alertSent,setAlertSent]=useState(false);
-  const [blBtn,setBlBtn]=useState({text:'🚫 BLACKLIST NUMBER',cls:'btn-warn'});
-  const [clock,setClock]=useState('');
-  const [thresholds,setThresholds]=useState({medium:40,high:60,dangerous:80});
-  const [alertToggles,setAlertToggles]=useState({otp:true,impersonation:true,deepfake:true,upi:true,emergency:false});
-  const [toastMsg,setToastMsg]=useState('');
-  const [toastShow,setToastShow]=useState(false);
-  const playRef=useRef(),callRef=useRef();
-  const [displayScore, setDisplayScore] = useState(0);
- const [backendData, setBackendData] = useState(null);
-useEffect(() => {
-  if (backendData?.transcript) {
-    const lines = backendData.transcript.split(".");
-
-    setTranscript(
-      lines
-        .map((t, i) => t.trim())
-        .filter(Boolean)
-        .map((t, i) => ({
-          who: "caller",
-          text: t,
-          t: `0:${i * 3}`
-        }))
-    );
-  }
-}, [backendData]);
-
-useEffect(() => {
-  fetch("http://127.0.0.1:8000/start-call");
-}, []);
-const adaptBackend = (data) => {
-  if (!data) return null;
-
-  return {
-    scamScore: Math.round((data.decision?.risk_score || 0) * 100),
-    riskLevel: data.decision?.risk_level || "LOW",
-
-    signals: [
-      Math.round((data.signals?.linguistic_score || 0) * 100),
-      Math.round((data.signals?.impersonation_score || 0) * 100),
-      Math.round((data.signals?.money_risk || 0) * 100),
-      Math.round((data.signals?.voice_risk || 0) * 100)
-    ],
-
-    transcript: data.transcript || "",
-
-    alerts: (data.decision?.reason_codes || []).map(code => ({
-      cls: "a-red",
-      icon: "⚠️",
-      text: code.replaceAll("_", " ")
-    }))
-  };
-};
-useEffect(() => {
-  const interval = setInterval(async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:8000/get-result");
-      const data = await res.json();
-      const adapted = adaptBackend(data);
-setBackendData(adapted);
-    } catch (e) {}
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, []);
-useEffect(() => {
-  if (!backendData) return;
-
-  const target = backendData.scamScore || 0;
-  const interval = setInterval(() => {
-    setDisplayScore(prev => {
-      if (prev >= target) return target;
-      return prev + 2;
-    });
-  }, 50);
-
-  return () => clearInterval(interval);
-}, [backendData]);
-const scen = {
-  ...SCENARIOS[scenIdx],
-  scamScore: backendData?.scamScore || 0,
-  riskLevel: backendData?.riskLevel || "LOW",
-  signals: backendData?.signals || [0,0,0,0]
-};  // ✅ FIXED FALLBACK
-
-  const toast=msg=>{setToastMsg(msg);setToastShow(true);setTimeout(()=>setToastShow(false),2500);};
-  useEffect(() => {
-  }, []);
-  useEffect(()=>{const tick=()=>{const n=new Date(),p=v=>String(v).padStart(2,'0');setClock(`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`)};tick();const id=setInterval(tick,1000);return()=>clearInterval(id);},[]);
-
-  const getRiskLbl=s=>s>=thresholds.dangerous?'DANGEROUS':s>=thresholds.high?'HIGH RISK':s>=thresholds.medium?'MEDIUM':'LOW RISK';
-  const getRiskCls=s=>s>=thresholds.dangerous?'risk-dangerous':s>=thresholds.high?'risk-high':s>=thresholds.medium?'risk-medium':'risk-low';
-  const getScamCls=s=>s>=thresholds.dangerous?'danger':s>=thresholds.high?'warn':'safe';
-
-  const stopPlay=()=>{setIsPlaying(false);clearTimeout(playRef.current);clearInterval(callRef.current);setPlayPos(0);setCallSecs(0);setTranscript([{who:'system',text:'Call starting — analysis armed...',t:'0:00'}]);};
-  const selectScenario=i=>{stopPlay();setScenIdx(i);setBlBtn({text:'🚫 BLACKLIST NUMBER',cls:'btn-warn'});};
-  const togglePlay = () => {
-  setIsPlaying(true);
-};
-
-  useEffect(()=>{
-    if(!isPlaying)return;
-    const run=()=>setPlayPos(p=>{
-      const np=parseFloat((p+0.1).toFixed(1));
-      if(np>=PLAY_DUR){setIsPlaying(false);clearInterval(callRef.current);return PLAY_DUR;}
-      scen.transcript.forEach(line=>{const[m,s]=line.t.split(':').map(Number);if(Math.abs(np-(m*60+s))<0.12) setTranscript(t=>[...t,line]);});
-      playRef.current=setTimeout(run,100);return np;
-    });
-    playRef.current=setTimeout(run,100);return()=>clearTimeout(playRef.current);
-  },[isPlaying,scen]);
-  
-
-  const blacklistNumber=async()=>{
-    const num=scen.number;
-    if(blacklist.find(b=>b.num===num)){setBlBtn({text:'✓ ALREADY BLACKLISTED',cls:'btn-ghost'});return;}
-    const m={0:'bl-ai',1:'bl-human',2:'bl-deep'},l={0:'AI',1:'HUMAN',2:'DEEPFAKE'};
-    setBlacklist(b=>[...b,{num,type:l[scenIdx],cls:m[scenIdx]}]);
-    setBlBtn({text:`✓ ${num} BLACKLISTED`,cls:'btn-success'});
-    toast(`🚫 ${num} blacklisted`);
-    try{await fetch(`${BACKEND}/exotel/webhook`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'blacklist',number:num}),signal:AbortSignal.timeout(2000)});}catch{}
-  };
-
-  const exportReport=()=>{
-    const s=scen,r={call_id:'call_'+Date.now(),timestamp:new Date().toISOString(),caller_number:s.number,caller_type:s.callerType,scam_score:s.scamScore,risk_level:s.riskLevel,deepfake_risk:s.deepfake,voice_match:s.voiceMatch,signals:Object.fromEntries(s.signalLabels.map((l,i)=>[l,s.signals[i]])),transcript:s.transcript.map(t=>t.text).join(' | ')};
-    const b=new Blob([JSON.stringify(r,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`scamurai_incident_${s.number.replace(/\D/g,'')}.json`;a.click();
-    toast('📤 Incident report exported');
-  };
-
-  const sendAlert=async()=>{
-    try{await fetch(`${BACKEND}/exotel/webhook`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'alert',number:scen.number,score:scen.scamScore}),signal:AbortSignal.timeout(2000)});}catch{}
-    setNotifSent(true);setAlertSent(true);
-    toast(`🚨 Alert sent to ${contacts.filter(c=>c.notify).length} contacts`);
-    setTimeout(()=>{setShowNotif(false);setNotifSent(false);},2500);
-  };
-
-  const pct=(playPos/PLAY_DUR)*100,pm=Math.floor(playPos/60),ps=Math.floor(playPos%60),cm=Math.floor(callSecs/60),cs=callSecs%60;
-
-  const NAV={DETECTION:['Live Monitor','Call History','Voice Analysis'],PROTECTION:['Blacklist Registry','Trusted Contacts','Alert Config'],INTEL:['Threat Patterns','AI Training Data','Incident Export']};
-
-  const renderPage=()=>{
-    if(page==='Call History') return <CallHistoryPage history={history} blacklist={blacklist} onBlacklist={(num,type)=>{const m={AI:'bl-ai',HUMAN:'bl-human',DEEPFAKE:'bl-deep',SAFE:'bl-human'};if(!blacklist.find(b=>b.num===num)){setBlacklist(b=>[...b,{num,type,cls:m[type]||'bl-human'}]);toast(`🚫 ${num} blacklisted`);}}}/>;
-    if(page==='Voice Analysis') return <VoiceAnalysisPage/>;
-    if(page==='Blacklist Registry') return <BlacklistPage blacklist={blacklist} onRemove={num=>{setBlacklist(b=>b.filter(x=>x.num!==num));toast('✓ Number removed');}} onAdd={e=>{if(!blacklist.find(b=>b.num===e.num)){setBlacklist(b=>[...b,e]);toast(`🚫 ${e.num} blacklisted`);}}}/>;
-    if(page==='Trusted Contacts') return <TrustedContactsPage contacts={contacts} onToggle={i=>setContacts(c=>c.map((x,j)=>j===i?{...x,notify:!x.notify}:x))} onAdd={c=>{setContacts(x=>[...x,c]);toast(`✓ ${c.name} added`);}} onRemove={i=>{setContacts(c=>c.filter((_,j)=>j!==i));toast('Contact removed');}}/>;
-    if(page==='Alert Config') return <AlertConfigPage thresholds={thresholds} onChange={(k,v)=>setThresholds(t=>({...t,[k]:v}))} toggles={alertToggles} onToggle={k=>setAlertToggles(t=>({...t,[k]:!t[k]}))}/>;
-    if(page==='Threat Patterns') return <ThreatPatternsPage/>;
-    if(page==='AI Training Data') return <TrainingDataPage/>;
-    if(page==='Incident Export') return <IncidentExportPage history={history} blacklist={blacklist} toast={toast}/>;
-    return null;
-  };
-
-  return(
-    <div className="dash">
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <div className="logo">
-          <div className="logo-icon">⚔</div>
-          <div><div className="logo-text">SCAMURAI</div><div className="logo-sub">THREAT INTEL v2.1</div></div>
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">BLACKLIST REGISTRY</div>
+            <div className="page-sub">{blacklist.length} numbers blocked</div>
+          </div>
+          <div className="card">
+            <div className="card-title">ADD NUMBER</div>
+            <div className="input-row">
+              <input type="tel" placeholder="91-XXXXXXXXXX" value={num} onChange={e => setNum(e.target.value)} onKeyDown={e => e.key === "Enter" && add()} />
+              <select value={type} onChange={e => setType(e.target.value)}>
+                <option>AI</option><option>HUMAN</option><option>DEEPFAKE</option>
+              </select>
+              <button className="btn btn-danger" style={{ padding: "8px 14px", whiteSpace: "nowrap" }} onClick={add}>ADD</button>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">BLOCKED {blacklist.length}</div>
+            {blacklist.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 24, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", fontSize: 12 }}>NO NUMBERS BLACKLISTED</div>
+            ) : (
+              <table className="tbl">
+                <thead><tr><th>NUMBER</th><th>TYPE</th><th>ACTION</th></tr></thead>
+                <tbody>
+                  {blacklist.map((b, i) => (
+                    <tr key={i}>
+                      <td style={{ fontFamily: "Share Tech Mono, monospace", color: "var(--cyan)", fontSize: 11 }}>{b.num}</td>
+                      <td>
+                        <span className="chip" style={{
+                          background: b.cls === "bl-human" ? "var(--orange-dim)" : b.cls === "bl-deep" ? "rgba(168,85,247,.15)" : "var(--red-dim)",
+                          color: b.cls === "bl-human" ? "var(--orange)" : b.cls === "bl-deep" ? "var(--purple)" : "var(--red)",
+                          border: `1px solid ${b.cls === "bl-human" ? "rgba(255,107,53,.3)" : b.cls === "bl-deep" ? "rgba(168,85,247,.3)" : "rgba(255,59,92,.3)"}`
+                        }}>
+                          {b.type}
+                        </span>
+                      </td>
+                      <td><span style={{ cursor: "pointer", color: "var(--red)", fontSize: 11, fontFamily: "Share Tech Mono, monospace" }} onClick={() => onRemove(b.num)}>REMOVE</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-        {Object.entries(NAV).map(([sec,items])=><React.Fragment key={sec}>
-          <div className="nav-section">{sec}</div>
-          {items.map(item=><div key={item} className={`nav-item${page===item?' active':''}`} onClick={()=>setPage(item)}><span className="nav-dot"/>{item}</div>)}
-        </React.Fragment>)}
-        <div className="bl-count-box">
-          <div style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',letterSpacing:'1.5px',marginBottom:4}}>BLACKLISTED NUMBERS</div>
-          <div style={{fontSize:28,fontWeight:800,color:'var(--red)'}}>{blacklist.length}</div>
-          <div style={{fontSize:11,color:'var(--text2)',marginTop:2}}>numbers blocked this session</div>
+      );
+    }
+
+    function TrustedContactsPage({ contacts, onToggle, onAdd, onRemove }) {
+      const [name, setName] = useState("");
+      const [phone, setPhone] = useState("");
+
+      const add = () => {
+        if (!name || !phone) return;
+        onAdd({ name, phone, notify: true });
+        setName("");
+        setPhone("");
+      };
+
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">TRUSTED CONTACTS</div>
+            <div className="page-sub">Emergency notification recipients</div>
+          </div>
+          <div className="card">
+            <div className="card-title">ADD CONTACT</div>
+            <div className="input-row">
+              <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+              <input type="tel" placeholder="91-XXXXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} onKeyDown={e => e.key === "Enter" && add()} />
+              <button className="btn btn-danger" style={{ padding: "8px 14px", whiteSpace: "nowrap" }} onClick={add}>ADD</button>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">CONTACTS {contacts.length}</div>
+            {contacts.map((c, i) => (
+              <div className="tog-row" key={i}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>{c.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", marginTop: 2 }}>{c.phone}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div className={`toggle ${c.notify ? "on" : ""}`} onClick={() => onToggle(i)}>
+                    <div className="toggle-knob"></div>
+                  </div>
+                  <span style={{ cursor: "pointer", color: "var(--red)", fontSize: 12, fontFamily: "Share Tech Mono, monospace" }} onClick={() => onRemove(i)}>REMOVE</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </aside>
+      );
+    }
 
-      {/* CENTER */}
-      <div className="center-col">
-        <header className="topbar">
-          <div className="sys-status"><div className={`sdot${alertSent?' red':''}`}/><span className="mono" style={{fontSize:12}}>{alertSent?'🚨 EMERGENCY ALERT SENT':'SYSTEM ARMED — EXOTEL CONNECTED'}</span></div>
-          <div className="exotel-badge">📞 EXOTEL LIVE</div>
-          <div className="clock">{clock}</div>
-        </header>
+    function AlertConfigPage({ thresholds, onChange, toggles, onToggle }) {
+      const rules = [
+        { k: "otp", l: "OTP Request Detection", s: "Alert when OTP requested" },
+        { k: "impersonation", l: "Authority Impersonation", s: "RBI/Bank/Police alerts" },
+        { k: "deepfake", l: "Deepfake Voice Detection", s: "Synthetic voice alerts" },
+        { k: "upi", l: "UPI Payment Requests", s: "Money transfer detection" },
+        { k: "emergency", l: "Auto Emergency Alert", s: "Auto-notify at DANGEROUS level" }
+      ];
 
-        {page==='Live Monitor'?(<>
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">ALERT CONFIG</div>
+            <div className="page-sub">Detection rules and thresholds</div>
+          </div>
+          <div className="card">
+            <div className="card-title">RISK SCORE THRESHOLDS</div>
+            <div style={{ position: "relative", height: 18, borderRadius: 9, overflow: "hidden", background: "var(--bg4)", marginBottom: 12 }}>
+              <div style={{ position: "absolute", left: 0, width: thresholds.medium + "%", height: "100%", background: "#00ff88", opacity: 0.7 }} />
+              <div style={{ position: "absolute", left: thresholds.medium + "%", width: Math.max(0, thresholds.high - thresholds.medium) + "%", height: "100%", background: "#ffd23f", opacity: 0.7 }} />
+              <div style={{ position: "absolute", left: thresholds.high + "%", width: Math.max(0, thresholds.dangerous - thresholds.high) + "%", height: "100%", background: "#ff6b35", opacity: 0.7 }} />
+              <div style={{ position: "absolute", left: thresholds.dangerous + "%", right: 0, height: "100%", background: "#ff3b5c", opacity: 0.7 }} />
+            </div>
+            {[
+              { label: "SAFE-MEDIUM", key: "medium", min: 10, max: 60 },
+              { label: "MEDIUM-HIGH", key: "high", min: 35, max: 80 },
+              { label: "HIGH-DANGER", key: "dangerous", min: 55, max: 95 }
+            ].map(row => (
+              <div className="thresh-row" key={row.key}>
+                <span className="thresh-lbl">{row.label}</span>
+                <input type="range" className="thresh-slider" min={row.min} max={row.max} value={thresholds[row.key]} onChange={e => onChange(row.key, Number(e.target.value))} />
+                <span className="thresh-val">{thresholds[row.key]}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 8, fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace" }}>
+              ZONES: 0–{thresholds.medium} LOW · {thresholds.medium}–{thresholds.high} MEDIUM · {thresholds.high}–{thresholds.dangerous} HIGH · {thresholds.dangerous}–100 DANGEROUS
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">ALERT RULES</div>
+            {rules.map(a => (
+              <div className="tog-row" key={a.k}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>{a.l}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", marginTop: 2 }}>{a.s}</div>
+                </div>
+                <div className={`toggle ${toggles[a.k] ? "on" : ""}`} onClick={() => onToggle(a.k)}>
+                  <div className="toggle-knob"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function ThreatPatternsPage() {
+      const p = [
+        { n: "OTP Harvesting", v: 87, t: "+12", c: "#ff3b5c", d: "Caller demands OTP under urgency" },
+        { n: "RBI/Bank Impersonation", v: 74, t: "+8", c: "#ff6b35", d: "Impersonates government officials" },
+        { n: "Family Emergency Lure", v: 61, t: "+23", c: "#a855f7", d: "Deepfake voices of relatives" },
+        { n: "Prize/Reward Scam", v: 55, t: "-3", c: "#ffd23f", d: "Fake lottery notifications" },
+        { n: "UPI Transfer Fraud", v: 69, t: "+15", c: "#ff3b5c", d: "Small processing payments" }
+      ];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">THREAT PATTERNS</div>
+            <div className="page-sub">Detected scam tactics and trends</div>
+          </div>
+          {p.map((x, i) => (
+            <div className="pattern-card" key={i}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>{x.n}</div>
+                <span style={{ fontSize: 11, color: x.t.startsWith("+") ? "var(--red)" : "var(--green)", fontFamily: "Share Tech Mono, monospace" }}>{x.t} this week</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text3)", margin: "3px 0 5px" }}>{x.d}</div>
+              <div className="pbar-w"><div className="pbar" style={{ width: x.v + "%", background: x.c }}></div></div>
+              <div style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace" }}>{x.v}% PREVALENCE</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function TrainingDataPage() {
+      const s = [
+        { id: "TRN-001", type: "AI", score: 91, label: "CONFIRMED SCAM", tags: ["OTP","BANK"] },
+        { id: "TRN-002", type: "HUMAN", score: 67, label: "CONFIRMED SCAM", tags: ["UPI","PRIZE"] },
+        { id: "TRN-003", type: "DEEPFAKE", score: 83, label: "CONFIRMED SCAM", tags: ["FAMILY","VOICE"] },
+        { id: "TRN-004", type: "SAFE", score: 8, label: "FALSE POSITIVE", tags: ["LEGIT"] }
+      ];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">AI TRAINING DATA</div>
+            <div className="page-sub">Labeled incidents for model improvement</div>
+          </div>
+          <div className="card">
+            <div className="card-title">TRAINING SAMPLES {s.length}</div>
+            <table className="tbl">
+              <thead><tr><th>ID</th><th>TYPE</th><th>SCORE</th><th>LABEL</th><th>TAGS</th></tr></thead>
+              <tbody>
+                {s.map((x, i) => (
+                  <tr key={i}>
+                    <td style={{ fontFamily: "Share Tech Mono, monospace", color: "var(--cyan)", fontSize: 11 }}>{x.id}</td>
+                    <td style={{ color: x.type === "SAFE" ? "var(--green)" : "var(--red)", fontSize: 11, fontFamily: "Share Tech Mono, monospace" }}>{x.type}</td>
+                    <td style={{ fontFamily: "Share Tech Mono, monospace", fontWeight: 700, color: x.score >= 70 ? "var(--red)" : x.score >= 40 ? "var(--yellow)" : "var(--green)" }}>{x.score}</td>
+                    <td style={{ fontSize: 11, color: x.label === "FALSE POSITIVE" ? "var(--yellow)" : "var(--text2)" }}>{x.label}</td>
+                    <td>{x.tags.map(t => <span key={t} className="chip chip-b" style={{ fontSize: 9, padding: "1px 5px" }}>{t}</span>)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    function IncidentExportPage({ history, blacklist, toast }) {
+      const dl = (data, name) => {
+        const b = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = name;
+        a.click();
+      };
+
+      const csv = () => {
+        const rows = [["Number","Type","Score","Risk","Duration"], ...history.map(h => [h.num, h.type, h.score, h.risk, h.duration])];
+        const b = new Blob([rows.map(x => x.join(",")).join("\n")], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = `scamurai-calls-${Date.now()}.csv`;
+        a.click();
+        toast("CSV exported");
+      };
+
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <div className="page-title">INCIDENT EXPORT</div>
+            <div className="page-sub">Download session data</div>
+          </div>
+          <div className="card">
+            <div className="card-title">EXPORT OPTIONS</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className="btn btn-danger" onClick={() => { dl({ time: new Date().toISOString(), callhistory: history, blacklist }, `scamurai-session-${Date.now()}.json`); toast("Full session exported"); }}>
+                EXPORT FULL SESSION REPORT JSON
+              </button>
+              <button className="btn btn-warn" onClick={csv}>EXPORT CALL LOG CSV</button>
+              <button className="btn btn-ghost" onClick={() => { window.print(); toast("Print dialog opened"); }}>
+                PRINT INCIDENT REPORT
+              </button>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">SESSION SUMMARY</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, textAlign: "center" }}>
+              {[
+                { k: "TOTAL CALLS", v: history.length, c: "var(--cyan)" },
+                { k: "SCAMS FLAGGED", v: history.filter(c => c.risk !== "LOW").length, c: "var(--red)" },
+                { k: "BL NUMBERS", v: blacklist.length, c: "var(--orange)" }
+              ].map(x => (
+                <div key={x.k}>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: x.c }}>{x.v}</div>
+                  <div style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", letterSpacing: 1 }}>{x.k}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [page, setPage] = useState("Live Monitor");
+      const [scenIdx, setScenIdx] = useState(0);
+      const [isPlaying, setIsPlaying] = useState(false);
+      const [playPos, setPlayPos] = useState(0);
+      const [callSecs, setCallSecs] = useState(0);
+      const [transcript, setTranscript] = useState([{ who: "system", text: "Waiting for call to begin...", t: "0:00" }]);
+
+      const [blacklist, setBlacklist] = useState([
+        { num: "91-9876543210", type: "AI", cls: "bl-ai" },
+        { num: "91-8800112233", type: "HUMAN", cls: "bl-human" },
+        { num: "91-9123456789", type: "DEEPFAKE", cls: "bl-deep" },
+        { num: "91-7777888999", type: "HUMAN", cls: "bl-human" }
+      ]);
+
+      const [contacts, setContacts] = useState([
+        { name: "Priya Daughter", phone: "91-9999000001", notify: true },
+        { name: "Rajesh Son", phone: "91-9999000002", notify: true },
+        { name: "Dr. Sharma", phone: "91-9999000003", notify: false }
+      ]);
+
+      const [history, setHistory] = useState([
+        { num: "91-9876543210", type: "AI", score: 88, risk: "DANGEROUS", duration: "0:30" },
+        { num: "91-8800112233", type: "HUMAN", score: 64, risk: "HIGH", duration: "0:24" },
+        { num: "91-9123456789", type: "DEEPFAKE", score: 79, risk: "DANGEROUS", duration: "0:19" },
+        { num: "91-7011223344", type: "SAFE", score: 12, risk: "LOW", duration: "1:45" },
+        { num: "91-6100099900", type: "HUMAN", score: 51, risk: "MEDIUM", duration: "0:38" }
+      ]);
+
+      const [showNotif, setShowNotif] = useState(false);
+      const [notifSent, setNotifSent] = useState(false);
+      const [alertSent, setAlertSent] = useState(false);
+      const [blBtn, setBlBtn] = useState({ text: "BLACKLIST NUMBER", cls: "btn-warn" });
+      const [clock, setClock] = useState("");
+      const [thresholds, setThresholds] = useState({ medium: 40, high: 60, dangerous: 80 });
+      const [alertToggles, setAlertToggles] = useState({
+        otp: true,
+        impersonation: true,
+        deepfake: true,
+        upi: true,
+        emergency: false
+      });
+      const [toastMsg, setToastMsg] = useState("");
+      const [toastShow, setToastShow] = useState(false);
+
+      const [backendData, setBackendData] = useState(null);
+      const [uploadedAudioName, setUploadedAudioName] = useState("");
+      const [uploadedAnalysis, setUploadedAnalysis] = useState(null);
+      const [pendingUploadAnalysis, setPendingUploadAnalysis] = useState(null);
+      const [uploadingAudio, setUploadingAudio] = useState(false);
+      const [uploadCountdown, setUploadCountdown] = useState(0);
+
+      const [animatedScore, setAnimatedScore] = useState(0);
+      const [animatedVoiceMatch, setAnimatedVoiceMatch] = useState(0);
+      const [animatedDeepfake, setAnimatedDeepfake] = useState(0);
+      const [animatedSignals, setAnimatedSignals] = useState([0, 0, 0, 0]);
+
+      const playRef = useRef(null);
+      const callRef = useRef(null);
+      const audioRef = useRef(null);
+      const uploadInputRef = useRef(null);
+
+      const toast = (msg) => {
+        setToastMsg(msg);
+        setToastShow(true);
+        setTimeout(() => setToastShow(false), 2500);
+      };
+
+      useEffect(() => {
+        const tick = () => {
+          const n = new Date();
+          const p = v => String(v).padStart(2, "0");
+          setClock(`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`);
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+      }, []);
+
+      const adaptBackend = useCallback((data) => {
+        if (!data) return null;
+        return {
+          scamScore: Math.round((data.decision?.risk_score || 0) * 100),
+          riskLevel: data.decision?.risk_level || "LOW",
+          signals: [
+            Math.round((data.signals?.linguistic_score || 0) * 100),
+            Math.round((data.signals?.impersonation_score || 0) * 100),
+            Math.round((data.signals?.money_risk || 0) * 100),
+            Math.round((data.signals?.voice_risk || 0) * 100)
+          ],
+          transcript: data.transcript,
+          alerts: (data.decision?.reason_codes || []).map(code => ({
+            cls: "a-red",
+            icon: "⚠",
+            text: String(code).replaceAll("_", " "),
+            t: "LIVE"
+          }))
+        };
+      }, []);
+
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const res = await fetch(`${BACKEND}/get-result`);
+            if (!res.ok) return;
+            const data = await res.json();
+            const adapted = adaptBackend(data);
+            if (adapted) setBackendData(adapted);
+          } catch (e) {}
+        };
+        const id = setInterval(fetchData, 1500);
+        return () => clearInterval(id);
+      }, [adaptBackend]);
+
+      const scenBase = SCENARIOS[scenIdx];
+
+      const normalizedUpload = useMemo(() => {
+        if (!uploadedAnalysis) return null;
+        const signals = uploadedAnalysis.signals || [0, 0, 0, 0];
+        const consensusBase =
+          uploadedAnalysis.consensusScore ??
+          uploadedAnalysis.totalScore ??
+          average([average(signals), uploadedAnalysis.deepfake || 0, 100 - ((uploadedAnalysis.voiceMatch || 0) * 100)]) * 0.25;
+
+        return {
+          label: uploadedAnalysis.isReal ? "REAL CALL ANALYSIS" : "UPLOADED AUDIO ANALYSIS",
+          callerType: uploadedAnalysis.isReal ? "LIKELY-REAL" : "LIKELY-FAKE",
+          number: uploadedAudioName || "LOCAL-UPLOAD",
+          scamScore: Math.round(consensusBase),
+          consensusScore: Math.round(consensusBase),
+          voiceMatch: uploadedAnalysis.voiceMatch ?? 0.85,
+          deepfake: uploadedAnalysis.deepfake ?? 10,
+          signalLabels: uploadedAnalysis.signalLabels || ["LINGUISTIC", "IMPERSONATION", "MONEY RISK", "VOICE RISK"],
+          signals,
+          sigColors: ["#00d4ff", "#ff6b35", "#ffd23f", "#a855f7"],
+          riskLevel: uploadedAnalysis.isReal ? "LOW" : (uploadedAnalysis.riskLevel || "HIGH"),
+          riskClass: uploadedAnalysis.isReal ? "risk-low" : riskFromScore(consensusBase, thresholds).cls,
+          transcript: uploadedAnalysis.transcript || [{ who: "system", text: uploadedAnalysis.isReal ? "Uploaded audio appears likely real." : "Uploaded audio shows likely scam/fake indicators.", t: "UPLOAD" }],
+          alerts: uploadedAnalysis.alerts || [
+            uploadedAnalysis.isReal
+              ? { cls: "a-green", icon: "✓", text: "Consensus indicates likely real low-threat audio", t: "UPLOAD" }
+              : { cls: "a-red", icon: "⚠", text: "Consensus indicates likely fake or threatening audio", t: "UPLOAD" }
+          ],
+          gaugeColor: uploadedAnalysis.isReal ? "#00ff88" : getColorForScore(consensusBase, thresholds),
+          waveBase: Math.round(consensusBase),
+          audio: null,
+          uploaded: true,
+          verdict: uploadedAnalysis.isReal ? "LIKELY REAL" : "LIKELY FAKE / SCAM"
+        };
+      }, [uploadedAnalysis, uploadedAudioName, thresholds]);
+
+      const activeSource = normalizedUpload || scenBase;
+      const effectiveSignals = activeSource.signals || [0, 0, 0, 0];
+      const totalSignalAverage = average(effectiveSignals);
+
+      const consensusTarget = useMemo(() => {
+        const scam = activeSource.scamScore || 0;
+        const deepfake = activeSource.deepfake || 0;
+        const voiceMismatch = 100 - ((activeSource.voiceMatch || 0) * 100);
+        const signalAvg = totalSignalAverage;
+        const consensus = scam * 0.45 + signalAvg * 0.30 + deepfake * 0.20 + voiceMismatch * 0.05;
+        return clamp(Math.round(consensus), 0, 100);
+      }, [activeSource, totalSignalAverage]);
+
+      useEffect(() => {
+        let rafId;
+        let start;
+        const fromScore = animatedScore;
+        const fromVoice = animatedVoiceMatch;
+        const fromDeepfake = animatedDeepfake;
+        const fromSignals = [...animatedSignals];
+        const targetSignals = effectiveSignals;
+        const targetVoice = Math.round((activeSource.voiceMatch || 0) * 100);
+        const targetDeepfake = activeSource.deepfake || 0;
+
+        const animate = (ts) => {
+          if (!start) start = ts;
+          const p = Math.min((ts - start) / 700, 1);
+          const wobble = isPlaying && !normalizedUpload ? Math.sin(ts / 180) * 2.2 : 0;
+
+          setAnimatedScore(clamp(Math.round(fromScore + (consensusTarget - fromScore) * p + wobble), 0, 100));
+          setAnimatedVoiceMatch(clamp(Math.round(fromVoice + (targetVoice - fromVoice) * p), 0, 100));
+          setAnimatedDeepfake(clamp(Math.round(fromDeepfake + (targetDeepfake - fromDeepfake) * p), 0, 100));
+          setAnimatedSignals(fromSignals.map((v, i) => clamp(Math.round(v + (targetSignals[i] - v) * p), 0, 100)));
+
+          if (p < 1) rafId = requestAnimationFrame(animate);
+        };
+
+        rafId = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(rafId);
+      }, [consensusTarget, activeSource, effectiveSignals, isPlaying, normalizedUpload]);
+
+      useEffect(() => {
+        if (!isPlaying || normalizedUpload) return;
+        const int = setInterval(() => setCallSecs(s => s + 1), 1000);
+        callRef.current = int;
+        return () => clearInterval(int);
+      }, [isPlaying, normalizedUpload]);
+
+      useEffect(() => {
+        if (!isPlaying || normalizedUpload) return;
+
+        const run = () => {
+          setPlayPos(prev => {
+            const next = parseFloat((prev + 0.1).toFixed(1));
+            if (next >= PLAYDUR) {
+              setIsPlaying(false);
+              return PLAYDUR;
+            }
+
+            scenBase.transcript.forEach(line => {
+              const [m, s] = line.t.split(":").map(Number);
+              const tt = m * 60 + s;
+              if (Math.abs(next - tt) < 0.06) {
+                setTranscript(t => {
+                  if (t.some(x => x.text === line.text)) return t;
+                  return [...t, line];
+                });
+              }
+            });
+
+            return next;
+          });
+
+          playRef.current = setTimeout(run, 100);
+        };
+
+        playRef.current = setTimeout(run, 100);
+        return () => clearTimeout(playRef.current);
+      }, [isPlaying, normalizedUpload, scenBase]);
+
+      useEffect(() => {
+        if (normalizedUpload && normalizedUpload.transcript) {
+          setTranscript(normalizedUpload.transcript);
+          setIsPlaying(false);
+          setPlayPos(0);
+          setCallSecs(0);
+        } else {
+          setTranscript([{ who: "system", text: "Waiting for call to begin...", t: "0:00" }]);
+        }
+      }, [normalizedUpload]);
+
+      useEffect(() => {
+        if (!pendingUploadAnalysis) return;
+
+        setUploadCountdown(5);
+        setUploadedAnalysis(null);
+        setPlayPos(0);
+        setCallSecs(0);
+        setIsPlaying(false);
+        setAnimatedScore(0);
+        setAnimatedVoiceMatch(0);
+        setAnimatedDeepfake(0);
+        setAnimatedSignals([0, 0, 0, 0]);
+        setTranscript([{ who: "system", text: "Audio uploaded. Analysis starts in 5 seconds...", t: "0:00" }]);
+
+        const interval = setInterval(() => {
+          setUploadCountdown(v => {
+            if (v <= 1) {
+              clearInterval(interval);
+              return 0;
+            }
+            return v - 1;
+          });
+        }, 1000);
+
+        const timer = setTimeout(() => {
+          setUploadedAnalysis(pendingUploadAnalysis);
+          setPendingUploadAnalysis(null);
+          setPage("Live Monitor");
+        }, 5000);
+
+        return () => {
+          clearInterval(interval);
+          clearTimeout(timer);
+        };
+      }, [pendingUploadAnalysis]);
+
+      const currentRisk = riskFromScore(animatedScore, thresholds);
+      const getScamCls = s => s >= thresholds.dangerous ? "danger" : s >= thresholds.high ? "warn" : "safe";
+
+      const stopPlay = () => {
+        setIsPlaying(false);
+        clearTimeout(playRef.current);
+        clearInterval(callRef.current);
+        setPlayPos(0);
+        setCallSecs(0);
+        if (!normalizedUpload) {
+          setTranscript([{ who: "system", text: "Call starting... analysis armed...", t: "0:00" }]);
+        }
+      };
+
+      const selectScenario = (i) => {
+        setPendingUploadAnalysis(null);
+        setUploadedAnalysis(null);
+        setUploadedAudioName("");
+        setUploadCountdown(0);
+        stopPlay();
+        setScenIdx(i);
+        setBlBtn({ text: "BLACKLIST NUMBER", cls: "btn-warn" });
+      };
+
+      const togglePlay = () => {
+        if (normalizedUpload) return;
+
+        if (isPlaying) {
+          setIsPlaying(false);
+          clearTimeout(playRef.current);
+          clearInterval(callRef.current);
+          if (audioRef.current) audioRef.current.pause();
+          return;
+        }
+
+        setTranscript([{ who: "system", text: "Live call connected. Monitoring risk in real time...", t: "0:00" }]);
+        setPlayPos(0);
+        setCallSecs(0);
+        setIsPlaying(true);
+
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+
+        const audio = new Audio(scenBase.audio);
+        audioRef.current = audio;
+        audio.play().catch(() => {});
+      };
+
+      const onThresholdChange = (key, value) => {
+        setThresholds(prev => {
+          let next = { ...prev, [key]: value };
+          if (key === "medium" && next.medium >= next.high) next.high = clamp(next.medium + 1, 35, 80);
+          if (key === "high") {
+            if (next.high <= next.medium) next.medium = clamp(next.high - 1, 10, 60);
+            if (next.high >= next.dangerous) next.dangerous = clamp(next.high + 1, 55, 95);
+          }
+          if (key === "dangerous" && next.dangerous <= next.high) next.high = clamp(next.dangerous - 1, 35, 80);
+          return next;
+        });
+      };
+
+      const blacklistNumber = async () => {
+        const num = activeSource.number;
+        if (blacklist.find(b => b.num === num)) {
+          setBlBtn({ text: "ALREADY BLACKLISTED", cls: "btn-ghost" });
+          return;
+        }
+
+        const clsMap = normalizedUpload
+          ? (normalizedUpload.verdict === "LIKELY REAL" ? "bl-human" : "bl-ai")
+          : ["bl-ai", "bl-human", "bl-deep"][scenIdx];
+
+        const labelMap = normalizedUpload
+          ? (normalizedUpload.verdict === "LIKELY REAL" ? "HUMAN" : "AI")
+          : ["AI", "HUMAN", "DEEPFAKE"][scenIdx];
+
+        setBlacklist(b => [...b, { num, type: labelMap, cls: clsMap }]);
+        setBlBtn({ text: `${num} BLACKLISTED`, cls: "btn-success" });
+        toast(`${num} blacklisted`);
+
+        try {
+          await fetch(`${BACKEND}/exotel-webhook`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "blacklist", number: num }),
+            signal: AbortSignal.timeout(2000)
+          });
+        } catch (e) {}
+      };
+
+      const exportReport = () => {
+        const s = activeSource;
+        const r = {
+          callid: `call-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          callernumber: s.number,
+          callertype: s.callerType,
+          consensusscore: animatedScore,
+          basescore: s.scamScore,
+          risklevel: currentRisk.label,
+          deepfakerisk: s.deepfake,
+          voicematch: s.voiceMatch,
+          signals: Object.fromEntries(s.signalLabels.map((l, i) => [l, animatedSignals[i] || 0])),
+          transcript: (s.transcript || []).map(t => t.text).join(" "),
+        };
+        const b = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = `scamurai-incident-${String(s.number).replace(/\D/g, "") || "upload"}.json`;
+        a.click();
+        toast("Incident report exported");
+      };
+
+      const sendAlert = async () => {
+        try {
+          await fetch(`${BACKEND}/exotel-webhook`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "alert", number: activeSource.number, score: animatedScore }),
+            signal: AbortSignal.timeout(2000)
+          });
+        } catch (e) {}
+
+        setNotifSent(true);
+        setAlertSent(true);
+        toast(`Alert sent to ${contacts.filter(c => c.notify).length} contacts`);
+        setTimeout(() => {
+          setShowNotif(false);
+          setNotifSent(false);
+        }, 2500);
+      };
+
+      const handleAudioUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAudio(true);
+        setUploadedAudioName(file.name);
+        setPendingUploadAnalysis(null);
+        setUploadedAnalysis(null);
+        toast("Uploading audio for analysis...");
+
+        try {
+          const formData = new FormData();
+          formData.append("audio", file);
+
+          const res = await fetch(`${BACKEND}/analyze-upload`, {
+            method: "POST",
+            body: formData
+          });
+
+          if (!res.ok) throw new Error("Upload analysis failed");
+
+          const data = await res.json();
+
+          const totalScore = Math.round(
+            data.total_score ??
+            data.scam_score ??
+            ((data.decision?.risk_score ?? 0) * 100)
+          );
+
+          const voiceMatch = data.voice_match_score ?? data.voice_match ?? 0.86;
+          const deepfake = Math.round(
+            data.deepfake_risk_score ??
+            data.deepfake_risk ??
+            data.voice_risk ??
+            8
+          );
+
+          const sigs = [
+            Math.round(data.linguistic_score ?? data.signals?.linguistic_score ?? 18),
+            Math.round(data.impersonation_score ?? data.signals?.impersonation_score ?? 10),
+            Math.round(data.money_risk ?? data.signals?.money_risk ?? 8),
+            Math.round(data.voice_risk ?? data.signals?.voice_risk ?? deepfake)
+          ];
+
+          const consensusScore = clamp(
+            Math.round(totalScore * 0.45 + average(sigs) * 0.30 + deepfake * 0.20 + (100 - voiceMatch * 100) * 0.05),
+            0,
+            100
+          );
+
+          const isReal = typeof data.is_real === "boolean" ? data.is_real : consensusScore < thresholds.medium;
+
+          const transcriptLines = data.transcript
+            ? String(data.transcript)
+                .split(".")
+                .map(x => x.trim())
+                .filter(Boolean)
+                .slice(0, 5)
+                .map((text, i) => ({ who: "caller", text, t: `U${i + 1}` }))
+            : [
+                {
+                  who: "system",
+                  text: isReal ? "Audio appears likely real with low threat indicators." : "Audio appears likely fake or scam-associated.",
+                  t: "UPLOAD"
+                }
+              ];
+
+          const alerts = isReal
+            ? [
+                { cls: "a-green", icon: "✓", text: "Likely real voice low-risk call", t: "UPLOAD" },
+                { cls: "a-green", icon: "✓", text: "No strong synthetic or scam consensus trigger", t: "UPLOAD" }
+              ]
+            : [
+                { cls: "a-red", icon: "⚠", text: "Consensus indicates likely fake or scam audio", t: "UPLOAD" },
+                { cls: deepfake > 55 ? "a-red" : "a-yel", icon: "⚠", text: `Voice manipulation risk ${deepfake}%`, t: "UPLOAD" }
+              ];
+
+          const prepared = {
+            isReal,
+            totalScore,
+            consensusScore,
+            voiceMatch,
+            deepfake,
+            signals: sigs,
+            signalLabels: ["LINGUISTIC", "IMPERSONATION", "MONEY RISK", "VOICE RISK"],
+            transcript: transcriptLines,
+            alerts,
+            riskLevel: riskFromScore(consensusScore, thresholds).label
+          };
+
+          setPendingUploadAnalysis(prepared);
+          toast("Audio uploaded. Analysis will begin after 5 seconds.");
+          setPage("Live Monitor");
+        } catch (err) {
+          toast("Audio analysis failed");
+        } finally {
+          setUploadingAudio(false);
+          e.target.value = "";
+        }
+      };
+
+      const renderPage = () => {
+        if (page === "Call History") {
+          return (
+            <CallHistoryPage
+              history={history}
+              blacklist={blacklist}
+              onBlacklist={(num, type) => {
+                const m = { AI: "bl-ai", HUMAN: "bl-human", DEEPFAKE: "bl-deep", SAFE: "bl-human" };
+                if (!blacklist.find(b => b.num === num)) {
+                  setBlacklist(b => [...b, { num, type, cls: m[type] || "bl-human" }]);
+                  toast(`${num} blacklisted`);
+                }
+              }}
+            />
+          );
+        }
+
+        if (page === "Voice Analysis") return <VoiceAnalysisPage />;
+
+        if (page === "Blacklist Registry") {
+          return (
+            <BlacklistPage
+              blacklist={blacklist}
+              onRemove={(num) => {
+                setBlacklist(b => b.filter(x => x.num !== num));
+                toast("Number removed");
+              }}
+              onAdd={(e) => {
+                if (!blacklist.find(b => b.num === e.num)) {
+                  setBlacklist(b => [...b, e]);
+                  toast(`${e.num} blacklisted`);
+                }
+              }}
+            />
+          );
+        }
+
+        if (page === "Trusted Contacts") {
+          return (
+            <TrustedContactsPage
+              contacts={contacts}
+              onToggle={(i) => setContacts(c => c.map((x, j) => j === i ? { ...x, notify: !x.notify } : x))}
+              onAdd={(c) => {
+                setContacts(x => [...x, c]);
+                toast(`${c.name} added`);
+              }}
+              onRemove={(i) => {
+                setContacts(c => c.filter((_, j) => j !== i));
+                toast("Contact removed");
+              }}
+            />
+          );
+        }
+
+        if (page === "Alert Config") {
+          return (
+            <AlertConfigPage
+              thresholds={thresholds}
+              onChange={onThresholdChange}
+              toggles={alertToggles}
+              onToggle={(k) => setAlertToggles(t => ({ ...t, [k]: !t[k] }))}
+            />
+          );
+        }
+
+        if (page === "Threat Patterns") return <ThreatPatternsPage />;
+        if (page === "AI Training Data") return <TrainingDataPage />;
+        if (page === "Incident Export") return <IncidentExportPage history={history} blacklist={blacklist} toast={toast} />;
+
+        const pm = Math.floor(playPos / 60);
+        const ps = String(Math.floor(playPos % 60)).padStart(2, "0");
+        const cm = Math.floor(callSecs / 60);
+        const cs = String(callSecs % 60).padStart(2, "0");
+        const pct = (playPos / PLAYDUR) * 100;
+
+        return (
           <main className="main">
             <div className="scen-strip">
-              {SCENARIOS.map((s,i)=><div key={s.id} className={`sc${scenIdx===i?' s'+i:''}`} style={{pointerEvents:"none", opacity:0.6}}>
-                <div className={`sc-badge ${i===0?'b-ai':i===1?'b-hu':'b-dp'}`}>{i===0?'AI SCAMMER':i===1?'HUMAN':'DEEPFAKE'}</div>
-                <div style={{fontSize:20,marginBottom:4}}>{i===0?'🤖':i===1?'👤':'👥'}</div>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2}}>{i===0?'AI Scammer Call':i===1?'Human Scammer Call':'Deepfake Family'}</div>
-                <div style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace',letterSpacing:1}}>{i===0?'BANK IMPERSONATION':i===1?'OTP / UPI FRAUD':'VOICE CLONE ATTACK'}</div>
-              </div>)}
+              {SCENARIOS.map((s, i) => (
+                <div
+                  key={s.id}
+                  className={`sc ${!normalizedUpload && scenIdx === i ? `s${i}` : ""}`}
+                  onClick={() => selectScenario(i)}
+                >
+                  <div className={`sc-badge ${i === 0 ? "b-ai" : i === 1 ? "b-hu" : "b-dp"}`}>
+                    {i === 0 ? "AI SCAMMER" : i === 1 ? "HUMAN" : "DEEPFAKE"}
+                  </div>
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>{i === 0 ? "🤖" : i === 1 ? "🕴️" : "🎭"}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
+                    {i === 0 ? "AI Scammer Call" : i === 1 ? "Human Scammer Call" : "Deepfake Family"}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", letterSpacing: 1 }}>
+                    {i === 0 ? "BANK IMPERSONATION" : i === 1 ? "OTP UPI FRAUD" : "VOICE CLONE ATTACK"}
+                  </div>
+                </div>
+              ))}
             </div>
+
             <div className="metrics-row">
-              <div className="metric"><div className="lbl">SCAM SCORE</div><div className={`val mono ${getScamCls(scen.scamScore)}`}>{scen.scamScore}</div><div className="ch" style={{color:scen.scamScore>=thresholds.dangerous?'var(--red)':'var(--yellow)'}}>▲ {getRiskLbl(scen.scamScore)}</div></div>
-              <div className="metric"><div className="lbl">VOICE MATCH</div><div className="val warn mono">{scen.voiceMatch}</div><div className="ch" style={{color:'var(--text3)'}}>AI-LIKELY CALLER</div></div>
-              <div className="metric"><div className="lbl">DEEPFAKE RISK</div><div className={`val mono ${scen.deepfake>=70?'danger':'warn'}`}>{scen.deepfake}%</div><div className="ch" style={{color:scen.deepfake>=70?'var(--red)':'var(--yellow)'}}>{scen.deepfake>=70?'HIGH SYNTHETIC':'MEDIUM RISK'}</div></div>
-              <div className="metric"><div className="lbl">CALL DURATION</div><div className="val info mono">{cm}:{String(cs).padStart(2,'0')}</div><div className="ch" style={{color:'var(--text3)'}}>{scen.callerType}</div></div>
+              <div className="metric">
+                <div className="lbl">CONSENSUS SCORE</div>
+                <div className={`val mono ${getScamCls(animatedScore)}`}>{animatedScore}</div>
+                <div className="ch" style={{ color: currentRisk.color }}>{currentRisk.label}</div>
+              </div>
+
+              <div className="metric">
+                <div className="lbl">VOICE MATCH</div>
+                <div className="val warn mono">{animatedVoiceMatch}</div>
+                <div className="ch" style={{ color: "var(--text3)" }}>{activeSource.callerType}</div>
+              </div>
+
+              <div className="metric">
+                <div className="lbl">DEEPFAKE RISK</div>
+                <div className={`val mono ${animatedDeepfake >= 70 ? "danger" : animatedDeepfake >= thresholds.medium ? "warn" : "safe"}`}>{animatedDeepfake}</div>
+                <div className="ch" style={{ color: animatedDeepfake >= 70 ? "var(--red)" : animatedDeepfake >= thresholds.medium ? "var(--yellow)" : "var(--green)" }}>
+                  {animatedDeepfake >= 70 ? "HIGH SYNTHETIC" : animatedDeepfake >= thresholds.medium ? "MEDIUM RISK" : "LOW RISK"}
+                </div>
+              </div>
+
+              <div className="metric">
+                <div className="lbl">{normalizedUpload ? "SOURCE" : "CALL DURATION"}</div>
+                <div className="val info mono">{normalizedUpload ? "UPLOAD" : `${cm}:${cs}`}</div>
+                <div className="ch" style={{ color: "var(--text3)" }}>{normalizedUpload ? (activeSource.verdict || activeSource.callerType) : activeSource.callerType}</div>
+              </div>
             </div>
+
             <div className="wave-panel">
               <div className="ph">
-                <div className="pt">LIVE THREAT WAVEFORM <span className="mono" style={{fontSize:10,color:'var(--text3)'}}>— RISK OVER TIME</span></div>
-                <div className={`risk-tag ${playPos>=PLAY_DUR?'risk-low':getRiskCls(scen.scamScore)}`}>{playPos>=PLAY_DUR?'CALL ENDED':scen.riskLevel}</div>
-              </div>
-              <div className="chart-area"><WaveCanvas scenario={scen} isPlaying={isPlaying} playPos={playPos}/></div>
-              <div className="play-bar">
-                <button className={`pbtn${isPlaying?' playing':''}`} onClick={togglePlay}>{playPos>=PLAY_DUR?'↺':isPlaying?'⏸':'▶'}</button>
-                <div className="prog-wrap" onClick={e=>{const r=e.currentTarget.getBoundingClientRect();setPlayPos(((e.clientX-r.left)/r.width)*PLAY_DUR);}}>
-                  <div className="prog-fill" style={{width:`${pct}%`}}/>
-                  <div className="prog-dot" style={{left:`calc(${pct}% - 5px)`}}/>
+                <div className="pt">LIVE THREAT WAVEFORM <span className="mono" style={{ fontSize: 10, color: "var(--text3)" }}>CONSENSUS OVER TIME</span></div>
+                <div className={`risk-tag ${currentRisk.cls}`}>
+                  {uploadCountdown > 0
+                    ? `ANALYSIS IN ${uploadCountdown}s`
+                    : normalizedUpload
+                    ? activeSource.verdict
+                    : playPos >= PLAYDUR
+                    ? "CALL ENDED"
+                    : currentRisk.label}
                 </div>
-                <span className="mono" style={{fontSize:11,color:'var(--text2)',flexShrink:0}}>{pm}:{String(ps).padStart(2,'0')} / 0:30</span>
-                <span className="mono" style={{fontSize:11,color:'var(--cyan)',flexShrink:0,marginLeft:8}}>{scen.number}</span>
+              </div>
+              <div className="chart-area">
+                <WaveCanvas score={animatedScore} isPlaying={isPlaying && !normalizedUpload} playPos={playPos} />
+              </div>
+
+              <div className="play-bar">
+                <button className={`pbtn ${isPlaying ? "playing" : ""}`} onClick={togglePlay} disabled={!!normalizedUpload}>
+                  {normalizedUpload ? "■" : isPlaying ? "❚❚" : "▶"}
+                </button>
+                <div
+                  className="prog-wrap"
+                  onClick={(e) => {
+                    if (normalizedUpload) return;
+                    const r = e.currentTarget.getBoundingClientRect();
+                    setPlayPos(((e.clientX - r.left) / r.width) * PLAYDUR);
+                  }}
+                >
+                  <div className="prog-fill" style={{ width: `${pct}%` }}></div>
+                  <div className="prog-dot" style={{ left: `calc(${pct}% - 5px)` }}></div>
+                </div>
+                <span className="mono" style={{ fontSize: 11, color: "var(--text2)", flexShrink: 0 }}>
+                  {normalizedUpload ? (uploadCountdown > 0 ? `0:0${5 - uploadCountdown}` : "UPLOAD") : `${pm}:${ps} / 0:30`}
+                </span>
+                <span className="mono" style={{ fontSize: 11, color: "var(--cyan)", flexShrink: 0, marginLeft: 8 }}>
+                  {activeSource.number}
+                </span>
               </div>
             </div>
+
+            <div className="upload-center">
+              <button
+                className="btn btn-upload"
+                onClick={() => uploadInputRef.current?.click()}
+                disabled={uploadingAudio}
+              >
+                {uploadingAudio ? "ANALYZING AUDIO..." : "UPLOAD AUDIO FOR ANALYSIS"}
+              </button>
+              <input
+                ref={uploadInputRef}
+                type="file"
+                accept="audio/*,.wav,.mp3,.m4a"
+                style={{ display: "none" }}
+                onChange={handleAudioUpload}
+              />
+              {uploadedAudioName ? (
+                <div className={`upload-status ${uploadedAnalysis ? (uploadedAnalysis.isReal ? "good" : "bad") : "info"}`}>
+                  {uploadCountdown > 0
+                    ? `${uploadedAudioName} uploaded. Analysis begins in ${uploadCountdown} seconds.`
+                    : uploadedAnalysis
+                    ? `${uploadedAudioName} — ${uploadedAnalysis.isReal ? "LIKELY REAL" : "LIKELY FAKE / SCAM"}`
+                    : `${uploadedAudioName} selected`}
+                </div>
+              ) : null}
+            </div>
+
             <div className="sig-row">
-              {scen.signalLabels.map((lbl,i)=><div className="sig-card" key={lbl}>
-                <div className="sig-name">{lbl}</div>
-                <div className="sig-pct" style={{color:scen.sigColors[i]}}>{scen.signals[i]}%</div>
-                <div className="sig-bar-w"><div className="sig-bar" style={{width:`${scen.signals[i]}%`,background:scen.sigColors[i]}}/></div>
-              </div>)}
+              {activeSource.signalLabels.map((lbl, i) => (
+                <div className="sig-card" key={lbl}>
+                  <div className="sig-name">{lbl}</div>
+                  <div className="sig-pct" style={{ color: activeSource.sigColors[i] }}>{animatedSignals[i] || 0}</div>
+                  <div className="sig-bar-w">
+                    <div className="sig-bar" style={{ width: `${animatedSignals[i] || 0}%`, background: activeSource.sigColors[i] }}></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </main>
-          <footer className="footer">
-            {[['var(--green)','PIPELINE: ACTIVE'],['var(--cyan)','EXOTEL: CONNECTED'],['var(--yellow)','MFCC ENGINE: ARMED'],['var(--purple)','DEEPFAKE DETECTOR: ON']].map(([c,l])=><div key={l} style={{display:'flex',alignItems:'center',gap:6}}><div className="fdot" style={{background:c}}/>{l}</div>)}
-            <div style={{marginLeft:'auto'}}>SCAMURAI v2.1 — HACKATHON BUILD 2026</div>
-          </footer>
-        </>):(<main className="main">{renderPage()}</main>)}
-      </div>
+        );
+      };
 
-      {/* RIGHT PANEL */}
-      <aside className="right-panel">
-        <div className="rp-sec">
-          <div className="rp-ttl">THREAT GAUGE</div>
-          <div className="gauge-wrap">
-            <GaugeCanvas score={scen.scamScore} color={scen.gaugeColor}/>
-            <div className="gauge-lbl" style={{color:scen.gaugeColor}}>{scen.scamScore}</div>
-            <div className="gauge-sub">{getRiskLbl(scen.scamScore)}</div>
+      return (
+        <div className="dash">
+          <aside className="sidebar">
+            <div className="logo">
+              <div className="logo-icon">🛡</div>
+              <div>
+                <div className="logo-text">SCAMURAI</div>
+                <div className="logo-sub">THREAT INTEL v2.1</div>
+              </div>
+            </div>
+
+            {Object.entries(NAV).map(([sec, items]) => (
+              <React.Fragment key={sec}>
+                <div className="nav-section">{sec}</div>
+                {items.map(item => (
+                  <div key={item} className={`nav-item ${page === item ? "active" : ""}`} onClick={() => setPage(item)}>
+                    <span className="nav-dot"></span>{item}
+                  </div>
+                ))}
+              </React.Fragment>
+            ))}
+
+            <div className="bl-count-box">
+              <div style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace", letterSpacing: "1.5px", marginBottom: 4 }}>BLACKLISTED NUMBERS</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>{blacklist.length}</div>
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>numbers blocked this session</div>
+            </div>
+          </aside>
+
+          <div className="center-col">
+            <header className="topbar">
+              <div className="sys-status">
+                <div className={`sdot ${alertSent ? "red" : ""}`}></div>
+                <span className="mono" style={{ fontSize: 12 }}>{alertSent ? "EMERGENCY ALERT SENT" : "SYSTEM ARMED · EXOTEL CONNECTED"}</span>
+              </div>
+              <div className="exotel-badge">{normalizedUpload || pendingUploadAnalysis ? "LOCAL AUDIO ANALYSIS" : "EXOTEL LIVE"}</div>
+              <div className="clock">{clock}</div>
+            </header>
+
+            {page === "Live Monitor" ? renderPage() : <main className="main">{renderPage()}</main>}
+
+            <footer className="footer">
+              {[
+                ["var(--green)", "PIPELINE ACTIVE"],
+                ["var(--cyan)", normalizedUpload || pendingUploadAnalysis ? "UPLOAD MODE" : "EXOTEL CONNECTED"],
+                ["var(--yellow)", "MFCC ENGINE ARMED"],
+                ["var(--purple)", "DEEPFAKE DETECTOR ON"]
+              ].map(([c, l]) => (
+                <div key={l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div className="fdot" style={{ background: c }}></div>{l}
+                </div>
+              ))}
+              <div style={{ marginLeft: "auto" }}>SCAMURAI v2.1 HACKATHON BUILD 2026</div>
+            </footer>
           </div>
-        </div>
 
-        {/* ★ THRESHOLD GAUGE — MAIN FEATURE ★ */}
-        <div className="rp-sec">
-          <div className="rp-ttl">⚙ DETECTION THRESHOLDS</div>
-          <ThresholdGauge thresholds={thresholds} onChange={(k,v)=>setThresholds(t=>({...t,[k]:v}))} currentScore={scen.scamScore}/>
-        </div>
+          <aside className="right-panel">
+            <div className="rp-sec">
+              <div className="rp-ttl">THREAT GAUGE</div>
+              <div className="gauge-wrap">
+                <GaugeCanvas score={animatedScore} color={getColorForScore(animatedScore, thresholds)} />
+                <div className="gauge-lbl" style={{ color: getColorForScore(animatedScore, thresholds) }}>{animatedScore}</div>
+                <div className="gauge-sub">
+                  {uploadCountdown > 0 ? `WAITING ${uploadCountdown}s` : normalizedUpload ? activeSource.verdict : currentRisk.label}
+                </div>
+              </div>
+            </div>
 
-        <div className="rp-sec">
-          <div className="rp-ttl">LIVE TRANSCRIPT</div>
-          <div className="t-area">
-            {transcript.map((line,i)=><div key={i} className={`t-line${line.flag?' flag':''}`}>
-              <span className={`t-who mono ${line.who==='system'?'t-sys':'t-caller'}`}>{line.who==='system'?'SYS':'CALLER'}</span>
-              <span className="t-txt">{line.text}</span>
-              <span className="t-tm">{line.t}</span>
-            </div>)}
+            <div className="rp-sec">
+              <div className="rp-ttl">DETECTION THRESHOLDS</div>
+              <ThresholdGauge thresholds={thresholds} onChange={onThresholdChange} currentScore={animatedScore} />
+            </div>
+
+            <div className="rp-sec">
+              <div className="rp-ttl">LIVE TRANSCRIPT</div>
+              <div className="t-area">
+                {transcript.map((line, i) => (
+                  <div key={i} className={`t-line ${line.flag ? "flag" : ""}`}>
+                    <span className={`t-who mono ${line.who === "system" ? "t-sys" : "t-caller"}`}>{line.who === "system" ? "SYS" : "CALLER"}</span>
+                    <span className="t-txt">{line.text}</span>
+                    <span className="t-tm">{line.t}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rp-sec">
+              <div className="rp-ttl">ACTIVE ALERTS</div>
+              {(activeSource.alerts || []).map((a, i) => (
+                <div key={i} className={`alert-item ${a.cls}`}>
+                  <span style={{ fontSize: 13, flexShrink: 0 }}>{a.icon}</span>
+                  <div style={{ flex: 1, lineHeight: 1.4, fontSize: 11 }}>{a.text}</div>
+                  <span style={{ fontSize: 10, color: "var(--text3)", fontFamily: "Share Tech Mono, monospace" }}>{a.t}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="rp-sec">
+              <div className="rp-ttl">ACTIONS</div>
+              <div className="act-btns">
+                <button className="btn btn-danger" onClick={() => { setShowNotif(true); setNotifSent(false); }}>
+                  ALERT TRUSTED CONTACTS
+                </button>
+                <button className={`btn ${blBtn.cls}`} onClick={blacklistNumber}>{blBtn.text}</button>
+                <button className="btn btn-ghost" onClick={exportReport}>EXPORT INCIDENT REPORT</button>
+                {normalizedUpload ? (
+                  <button className="btn btn-success" onClick={() => {
+                    setUploadedAnalysis(null);
+                    setPendingUploadAnalysis(null);
+                    setUploadedAudioName("");
+                    setUploadCountdown(0);
+                    toast("Returned to live scenarios");
+                  }}>
+                    RETURN TO LIVE SCENARIOS
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rp-sec">
+              <div className="rp-ttl">BLACKLIST PREVIEW</div>
+              <div className="bl-preview">
+                {blacklist.map((b, i) => (
+                  <div key={i} className="bl-entry">
+                    <span className="bl-phone">{b.num}</span>
+                    <span className={`bl-tag ${b.cls}`}>{b.type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <div className={`overlay ${showNotif ? "show" : ""}`}>
+            <div className="modal">
+              <div className="m-icon">🚨</div>
+              <div className="m-title">SEND EMERGENCY ALERT</div>
+              <div className="m-msg">
+                {normalizedUpload ? "Uploaded audio analysis" : `Scam call from ${activeSource.number}`}
+                <br />
+                Score <strong style={{ color: "var(--red)" }}>{animatedScore} / {currentRisk.label}</strong>
+                <br />
+                Notifying <strong>{contacts.filter(c => c.notify).length}</strong> trusted contacts.
+              </div>
+              {!notifSent ? (
+                <div className="m-actions">
+                  <button className="m-confirm" onClick={sendAlert}>SEND NOW</button>
+                  <button className="m-cancel" onClick={() => setShowNotif(false)}>CANCEL</button>
+                </div>
+              ) : (
+                <div className="m-sent">ALERT SENT TO {contacts.filter(c => c.notify).length} CONTACTS</div>
+              )}
+            </div>
           </div>
+
+          <div className={`toast ${toastShow ? "show" : ""}`}>{toastMsg}</div>
         </div>
+      );
+    }
 
-        <div className="rp-sec">
-          <div className="rp-ttl">ACTIVE ALERTS</div>
-          {scen.alerts.map((a,i)=><div key={i} className={`alert-item ${a.cls}`}>
-            <span style={{fontSize:13,flexShrink:0}}>{a.icon}</span>
-            <div style={{flex:1,lineHeight:1.4,fontSize:11}}>{a.text}</div>
-            <span style={{fontSize:10,color:'var(--text3)',fontFamily:'Share Tech Mono,monospace'}}>{a.t}</span>
-          </div>)}
-        </div>
-
-        <div className="rp-sec">
-          <div className="rp-ttl">ACTIONS</div>
-          <div className="act-btns">
-            <button className="btn btn-danger" onClick={()=>{setShowNotif(true);setNotifSent(false);}}>🚨 ALERT TRUSTED CONTACTS</button>
-            <button className={`btn ${blBtn.cls}`} onClick={blacklistNumber}>{blBtn.text}</button>
-            <button className="btn btn-ghost" onClick={exportReport}>📤 EXPORT INCIDENT REPORT</button>
-          </div>
-        </div>
-
-        <div className="rp-sec">
-          <div className="rp-ttl">BLACKLIST PREVIEW</div>
-          <div className="bl-preview">
-            {blacklist.map((b,i)=><div key={i} className="bl-entry">
-              <span className="bl-phone">{b.num}</span>
-              <span className={`bl-tag ${b.cls}`}>{b.type}</span>
-            </div>)}
-          </div>
-        </div>
-      </aside>
-
-      {/* ALERT MODAL */}
-      <div className={`overlay${showNotif?' show':''}`}>
-        <div className="modal">
-          <div className="m-icon">🛡</div>
-          <div className="m-title">SEND EMERGENCY ALERT</div>
-          <div className="m-msg">
-            Scam call from <strong>{scen.number}</strong><br/>
-            Score: <strong style={{color:'var(--red)'}}>{scen.scamScore} — {scen.riskLevel}</strong><br/>
-            Notifying <strong>{contacts.filter(c=>c.notify).length}</strong> trusted contacts.
-          </div>
-          {!notifSent?(<div className="m-actions">
-            <button className="m-confirm" onClick={sendAlert}>SEND NOW</button>
-            <button className="m-cancel" onClick={()=>setShowNotif(false)}>CANCEL</button>
-          </div>):(
-            <div className="m-sent">✓ ALERT SENT TO {contacts.filter(c=>c.notify).length} CONTACTS</div>
-          )}
-        </div>
-      </div>
-
-      <div className={`toast${toastShow?' show':''}`}>{toastMsg}</div>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
